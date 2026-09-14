@@ -1,0 +1,2142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Merge Math Game</title>
+    <style>
+        /* FIX CODE: Screen ko hilne se rokne ke liye overflow aur touch properties */
+        html, body {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            /* NAYA CODE: Background ko 3D Colorful aur Animated banaya gaya hai */
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            user-select: none;
+            /* 3D Depth ke liye halka sa inner shadow */
+            box-shadow: inset 0 0 100px rgba(0,0,0,0.2);
+        }
+
+        /* Background Animation Logic */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 1%; /* Kam kiya taaki space bache */
+            width: 100%;
+        }
+        h1 {
+            color: #333;
+            font-size: 5vw; /* Thoda chhota kiya mobile ke liye */
+            margin: 0 0 5px 0;
+            /* Title ko thoda 3D look dene ke liye */
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+        }
+
+        /* Layout Adjustment for Mobile Screen */
+        .top-stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .score-container {
+            background: #4A90E2;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        /* 6x6 Grid aur Bade Boxes ke liye CSS badlav */
+        #grid {
+            width: 100vw; /* Thoda kam kiya taaki vertical space bache */
+            height: 100vw; 
+            max-width: 400px;
+            max-height: 400px;
+            background-color: #34495e;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr); /* 4 ki jagah 6 columns */
+            grid-template-rows: repeat(6, 1fr); /* 4 ki jagah 6 rows */
+            gap: 2%; /* px to % */
+            padding: 2.5%; /* px to % */
+            box-sizing: border-box;
+            touch-action: none; /* Mobile swipe ke liye */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            position: relative;
+            will-change: transform; /* Performance optimization */
+        }
+        .cell {
+            background-color: #2c3e50;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7vw; /* px to vw for dynamic text size */
+            font-weight: bold;
+            color: white;
+            /* Slide Animation ke liye transition - Fast 0.1s */
+            transition: transform 0.1s ease-in-out, background-color 0.1s ease;
+            position: relative;
+            pointer-events: none; /* Pointer events handled by parent grid */
+        }
+        
+        /* PC view ke liye font adjustment */
+        @media (min-width: 500px) {
+            .cell { font-size: 24px; }
+            h1 { font-size: 28px; }
+        }
+
+        /* Merge Animation (Pop effect) */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 3D effect removed from animation for performance optimization */
+        @keyframes glowAndPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Chamak tab tak bani rahegi jab tak doosra merge na ho */
+        .pop-effect {
+            animation: glowAndPop 0.2s ease-in-out;
+            box-shadow: 0 0 12px #00e5ff; 
+            z-index: 5;
+        }
+        
+        /* Alag alag numbers ke liye mast rang */
+        .n1 { background-color: #1abc9c; }
+        .n2 { background-color: #2ecc71; }
+        .n3 { background-color: #3498db; }
+        .n4 { background-color: #9b59b6; }
+        .n5 { background-color: #f1c40f; color: #333; }
+        .n6 { background-color: #e67e22; }
+        .n7 { background-color: #e74c3c; }
+        .n8 { background-color: #e84393; }
+        .n9 { background-color: #6c5ce7; }
+        .n10 { background-color: #00cec9; }
+
+        /* Naye bante hue numbers ke color code styles */
+        .n12 { background-color: #fd79a8; }
+        .n16 { background-color: #e17055; }
+        
+        /* DYNAMIC COLOR: 10000+ ke liye fallback */
+        .n-high { background-color: #57606f; }
+
+        .controls {
+            margin-top: 2%; 
+            text-align: center;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 15px; 
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            margin-top: 5px;
+            color: #333; /* Darker for animated BG visibility */
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* NAYA CODE: SVG overlay board ke upar free-form line kheechnay ke liye */
+        #swipe-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #drawing-line {
+            stroke: #00e5ff;
+            stroke-width: 6;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 3px #00e5ff);
+            opacity: 0;
+            transition: opacity 0.05s;
+        }
+        /* Touch hone par highlight effect */
+        .selected-cell {
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.8);
+            transform: scale(0.95);
+        }
+
+        /* NAYA CODE: Naye counters aur Game Over overlay ke liye CSS */
+        .header-stats {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap; /* Takki niche shift ho sakein mobile pe */
+            padding: 0 5px;
+        }
+        .stat-box {
+            background: #4A90E2;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            min-width: 60px;
+        }
+        
+        /* FIX CODE: Game over show hone ke liye isko global full overlay banaya gaya hai */
+        #game-over-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 5000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        #game-over-overlay h2 {
+            color: #e74c3c;
+            font-size: 10vw; /* px to vw */
+            margin-bottom: 3%;
+        }
+        #game-over-overlay p {
+            font-size: 5vw; /* px to vw */
+            margin-bottom: 5%;
+        }
+
+        /* NAYA CODE: Level Up 3D animation design */
+        #level-up-popup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.5);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #fff;
+            padding: 5% 10%; /* px to % */
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px #FFD700;
+            text-align: center;
+            z-index: 100;
+            font-weight: bold;
+            pointer-events: none;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+            opacity: 0;
+            width: 70%; /* Naya responsive width */
+        }
+        #level-up-popup.active {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 1;
+        }
+        #level-up-popup h2 {
+            margin: 0;
+            font-size: 8vw; /* px to vw */
+            text-shadow: 2px 4px 5px rgba(0,0,0,0.3);
+        }
+        #level-up-popup p {
+            margin: 1% 0 0 0;
+            font-size: 5vw; /* px to vw */
+        }
+
+        /* NAYA CODE: Level box ke 1 second scroll animation ke liye */
+        @keyframes levelScroll {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-15px); }
+            50% { transform: translateY(10px); }
+            75% { transform: translateY(-5px); }
+            100% { transform: translateY(0); }
+        }
+        .level-scroll-anim {
+            animation: levelScroll 1s ease-in-out;
+        }
+
+        /* NAYA CODE: Sound on/off button ke liye CSS */
+        .sound-btn {
+            background-color: #9b59b6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+
+        /* Back Button CSS */
+        .back-btn {
+            background-color: #7f8c8d;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --------------------------- */
+        /* NAYA CODE: AUTH & MENU UI (Image Based Modification) */
+        /* --------------------------- */
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        #auth-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #1abc9c, #2ecc71, #3498db, #9b59b6, #e67e22, #e74c3c);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .game-title-box {
+            margin-bottom: 5%; /* px to % */
+            text-align: center;
+        }
+        .game-title-box h1 {
+            color: #ffcc00;
+            font-size: 10vw; /* px to vw */
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ffcc00, 2px 2px 0px #000;
+            margin: 0;
+        }
+        .game-title-box span {
+            color: #ffffff;
+            font-size: 14px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .auth-card {
+            background: #0f1c24;
+            padding: 5% 8%; /* FIX: Padding kam ki screen fit ke liye */
+            border-radius: 5px;
+            border: 3px solid #b38f00;
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.3), inset 0 0 15px rgba(0,0,0,0.8);
+            width: 85%; /* px to % */
+            max-width: 320px;
+            text-align: center;
+            position: relative;
+            box-sizing: border-box; /* Zaroori hai width manage karne ke liye */
+        }
+        
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            border: 1px solid #ffcc00;
+            pointer-events: none;
+            border-radius: 5px;
+        }
+        
+        .input-group {
+            margin-bottom: 4%; /* px to % */
+            text-align: left;
+            position: relative;
+        }
+        
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 3%; /* px to % */
+            background: #080f14;
+            border: 1px solid #1a3344;
+            border-radius: 3px;
+            box-sizing: border-box;
+            font-size: 14px;
+            color: #00e5ff;
+            outline: none;
+        }
+        
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(to bottom, #ffdb4d, #b38f00);
+            color: #000;
+            padding: 4%; /* px to % */
+            border-radius: 3px;
+            font-size: 18px;
+            margin-top: 5%; /* px to % */
+            border: 1px solid #ffe680;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0px #665200, 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        /* Mode Selection Styles */
+        #mode-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(-45deg, #1abc9c, #2ecc71, #3498db, #9b59b6, #e67e22, #e74c3c);
+            background-size: 400% 400%;
+            animation: gradientShift 12s ease infinite;
+            z-index: 900;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-btn {
+            display: block;
+            width: 70%; /* px to % */
+            max-width: 260px;
+            padding: 5%; /* px to % */
+            margin: 4% auto; /* px to % */
+            border-radius: 10px;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* High Score Boxes */
+        .highscore-row {
+            display: flex;
+            justify-content: center;
+            gap: 3%; /* px to % */
+            margin-bottom: 4%; /* px to % */
+        }
+        .hs-box {
+            background: #ffffff;
+            width: 28%; /* px to % */
+            padding: 3% 1%; /* px to % */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #ddd;
+            text-align: center;
+        }
+
+        /* --------------------------- */
+        /* NAYA CODE: SIDEBARS & MODALS */
+        /* --------------------------- */
+        .left-sidebar {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 70%; /* px to % responsive */
+            max-width: 250px;
+            height: 100%;
+            background: #0f1c24;
+            border-right: 3px solid #b38f00;
+            z-index: 1500;
+            transition: left 0.3s ease;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            padding: 5% 4%; /* px to % */
+            box-sizing: border-box;
+        }
+        .left-sidebar.active {
+            left: 0;
+        }
+        .sidebar-btn {
+            background: #080f14;
+            color: #ffcc00;
+            border: 1px solid #1a3344;
+            padding: 5%; /* px to % */
+            margin-bottom: 3%; /* px to % */
+            border-radius: 3px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        #menu-trigger-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #0f1c24;
+            color: #ffcc00;
+            border: 2px solid #b38f00;
+            padding: 2% 4%; /* px to % */
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 850;
+            font-size: 14px;
+        }
+
+        .modal-card {
+            background: #0f1c24;
+            width: 85%; /* px to % */
+            max-width: 320px;
+            padding: 6%; /* px to % */
+            border-radius: 5px;
+            border: 3px solid #b38f00;
+            box-shadow: 0 0 25px rgba(255, 204, 0, 0.3);
+            text-align: center;
+            position: relative;
+        }
+
+        /* FIX: Dashboard Text Color to White */
+        .dashboard-row {
+            display: flex;
+            justify-content: space-between;
+            background: #080f14;
+            padding: 3%; /* px to % */
+            border-radius: 4px;
+            border: 1px solid #1a3344;
+            margin-bottom: 2%; /* px to % */
+            color: #ffffff; /* Font color white */
+        }
+        
+        .hs-profile-pic {
+            width: 10vw; /* px to vw */
+            height: 10vw;
+            max-width: 35px;
+            max-height: 35px;
+            border-radius: 50%;
+            margin: 0 auto 5px auto;
+            border: 2px solid #00e5ff;
+            display: block;
+            object-fit: cover;
+        }
+        
+        .profile-pic-container {
+            position: relative;
+            width: 25vw; /* px to vw */
+            height: 25vw;
+            max-width: 100px;
+            max-height: 100px;
+            margin: 0 auto 5% auto;
+            border-radius: 50%;
+            border: 3px solid #00e5ff;
+            overflow: hidden;
+            background: #080f14;
+        }
+        
+        /* Rest of existing classes maintain their relative properties */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 250px;
+            height: 100%;
+            background: #0f1c24;
+            border-left: 3px solid #b38f00;
+            z-index: 1002;
+            transition: right 0.3s ease;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            box-sizing: border-box;
+        }
+        .side-menu.active {
+            right: 0;
+        }
+        .side-menu-btn {
+            background: #080f14;
+            color: #ffcc00;
+            border: 1px solid #1a3344;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .close-menu-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: auto;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            color: #ffcc00;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .text-modal-content {
+            text-align: left;
+            color: #fff;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 10px;
+            background: #080f14;
+            border: 1px solid #1a3344;
+            border-radius: 3px;
+        }
+        .sidebar-close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: auto;
+        }
+        .eye-icon {
+            position: absolute;
+            right: 10px;
+            top: 28px;
+            cursor: pointer;
+            color: #ffcc00;
+            font-size: 18px;
+        }
+        .switch-text {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #999;
+        }
+        .switch-text span {
+            color: #00e5ff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .extra-links {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-top: 5px;
+            color: #ffcc00;
+        }
+        .highscore-title {
+            color: #333;
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+        .hs-box .rank-text { font-size: 12px; color: #7f8c8d; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; }
+        .hs-box .score-text { font-size: 20px; font-weight: bold; color: #2c3e50; }
+        .hs-box .user-text { font-size: 11px; color: #34495e; font-weight: bold; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hs-box .mobile-text { font-size: 10px; color: #7f8c8d; }
+        .hs-first { border-color: #FFD700; background: linear-gradient(to bottom, #ffffff, #fffdf0); }
+        .hs-second { border-color: #C0C0C0; background: linear-gradient(to bottom, #ffffff, #f7f7f7); }
+        .hs-third { border-color: #CD7F32; background: linear-gradient(to bottom, #ffffff, #faf3ee); }
+        .hs-first .score-text { color: #d4af37; }
+        .hs-first .rank-text { color: #d4af37; }
+
+        /* --------------------------- */
+        /* NEW ROOM UI STYLES */
+        /* --------------------------- */
+        #room-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #080f14;
+            z-index: 1100;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            color: white;
+        }
+        .wallet-display {
+            background: #b38f00;
+            color: #000;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .room-card {
+            background: #0f1c24;
+            border: 1px solid #ffcc00;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .room-info h4 { margin: 0; color: #ffcc00; }
+        .room-info p { margin: 5px 0; font-size: 12px; }
+        .win-history-item {
+            background: #080f14;
+            border-left: 4px solid #2ecc71;
+            padding: 10px;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+
+        /* NAYA CODE: Rank Modal Styles */
+        #rank-modal .rank-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #1a3344;
+            font-size: 14px;
+        }
+        #rank-modal .rank-header {
+            font-weight: bold;
+            color: #ffcc00;
+            border-bottom: 2px solid #b38f00;
+            margin-bottom: 5px;
+        }
+
+        /* NAYA CODE: Room History Modal Styles */
+        #room-history-modal .history-entry {
+            background: #0f1c24;
+            border: 1px solid #1a3344;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .history-rank-box {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #333;
+        }
+        .history-player {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #ccc;
+            margin-bottom: 2px;
+        }
+
+        /* ADD COINS TOP CENTER BUTTON & MODAL STYLES */
+        .add-coins-top-btn {
+            background: linear-gradient(135deg, #f1c40f, #e67e22);
+            color: #000;
+            border: 2px solid #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            text-transform: uppercase;
+            margin: 10px auto;
+            display: block;
+            transition: transform 0.2s;
+        }
+        .add-coins-top-btn:active {
+            transform: scale(0.95);
+        }
+        .deposit-history-item {
+            background: #080f14;
+            border: 1px solid #1a3344;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: left;
+        }
+        
+        /* Coin Selection Grid Styles */
+        .coin-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .coin-pack-btn {
+            background: #1a3344;
+            color: #ffcc00;
+            border: 2px solid #b38f00;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .coin-pack-btn:hover, .coin-pack-btn.selected {
+            background: #ffcc00;
+            color: #000;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <div class="left-sidebar" id="left-sidebar-menu">
+        <h3 style="color: #ffcc00;">Menu</h3>
+        <button class="sidebar-btn" onclick="openMathMergeDashboard()">📊 Math Merge Data</button>
+        <button class="sidebar-btn" onclick="openWinHistory()">🏆 Win History</button>
+        <button class="sidebar-btn" onclick="openProfileModalFromSidebar()">👤 Profile</button>
+        <button class="sidebar-btn" onclick="handleShareLink()">🔗 Share & Refer</button>
+        <button class="sidebar-btn" onclick="openGameRules()">📜 Game Rules</button>
+        <button class="sidebar-btn" onclick="openTermConditions()">📋 Terms & Conditions</button>
+        <button class="sidebar-btn" onclick="openWhatsAppHelp()">📞 Help</button>
+        <button class="sidebar-btn" onclick="handleLogout()">🚪 Logout</button>
+        <button class="sidebar-close-btn" onclick="toggleLeftSidebar(false)">Close Menu</button>
+    </div>
+
+    <!-- ADD COINS MODAL -->
+    <div class="modal-overlay" id="add-coins-modal">
+        <div class="modal-card" style="max-width: 350px;">
+            <span class="modal-close-btn" onclick="closeModal('add-coins-modal')">&times;</span>
+            <h2 style="color: #ffcc00; margin-top:0;">Add Coins</h2>
+            
+            <!-- Step 1: Select Coin Package -->
+            <div id="coin-selection-step">
+                <p style="font-size: 13px; color: #ccc; margin-bottom: 10px;">Select Coin Package:</p>
+                <div class="coin-grid">
+                    <button class="coin-pack-btn" onclick="selectCoinPackage(50)">50 Coins</button>
+                    <button class="coin-pack-btn" onclick="selectCoinPackage(100)">100 Coins</button>
+                    <button class="coin-pack-btn" onclick="selectCoinPackage(200)">200 Coins</button>
+                    <button class="coin-pack-btn" onclick="selectCoinPackage(500)">500 Coins</button>
+                    <button class="coin-pack-btn" onclick="selectCoinPackage(1000)" style="grid-column: span 2;">1000 Coins</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Payment & QR Section (Hidden initially) -->
+            <div id="payment-step" style="display: none;">
+                <p style="font-size: 13px; color: #2ecc71; margin: 0 0 5px 0;">Selected Package: <b id="selected-coin-text">0</b> Coins</p>
+                <div style="background: #fff; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 10px;">
+                    <img id="admin-qr-img" src="https://raw.githubusercontent.com/Imran13144/Game.image/main/Baroda.jpg" alt="Scan QR" style="width: 150px; height: 150px; object-fit: contain; display: block;">
+                </div>
+                <p style="font-size: 12px; color: #00e5ff; margin: 0 0 10px 0;">Scan QR Code & Pay via any UPI App</p>
+
+                <div class="input-group">
+                    <label style="color: #ffcc00; font-size:12px;">Transaction ID / UTR No.</label>
+                    <input type="text" id="deposit-txid" placeholder="Enter UPI Transaction ID">
+                </div>
+                <div class="input-group">
+                    <label style="color: #ffcc00; font-size:12px;">Upload Payment Screenshot</label>
+                    <input type="file" id="deposit-screenshot" accept="image/*" style="color:white; font-size:11px;">
+                </div>
+
+                <button class="auth-btn" id="submit-deposit-btn" onclick="submitDepositRequest()" style="font-size: 14px; margin-top:5px;">Submit Request</button>
+                <button onclick="resetCoinSelection()" style="background: #7f8c8d; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 12px; width: 100%; margin-top: 5px; cursor: pointer;">Back to Packages</button>
+            </div>
+
+            <button onclick="openDepositHistory()" style="background: #3498db; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 12px; width: 100%; margin-top: 10px; cursor: pointer;">View Deposit History</button>
+        </div>
+    </div>
+
+    <!-- DEPOSIT HISTORY MODAL -->
+    <div class="modal-overlay" id="deposit-history-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('deposit-history-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Deposit History</h2>
+            <div id="deposit-history-list" class="text-modal-content">
+                Loading history...
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="history-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('history-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Win History</h2>
+            <div id="win-history-list" class="text-modal-content">
+                </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="rank-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('rank-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Room Ranking</h2>
+            <div id="rank-list" class="text-modal-content">
+                <div class="rank-entry rank-header">
+                    <span>Player</span>
+                    <span>Score</span>
+                </div>
+                <div id="rank-data-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="room-history-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('room-history-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Room History</h2>
+            <div id="room-history-list" class="text-modal-content">
+                </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="dashboard-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('dashboard-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Math Merge Data</h2>
+            <div style="text-align: left;">
+                <div class="dashboard-row">
+                    <span>User Name:</span>
+                    <span id="dash-username">-</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Mobile:</span>
+                    <span id="dash-mobile">****</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Refer Code:</span>
+                    <span id="dash-refercode" style="color: #00e5ff;">-</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Current Score:</span>
+                    <span id="dash-score">0</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Current Level:</span>
+                    <span id="dash-level">1</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Game Mode:</span>
+                    <span id="dash-mode">-</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Wallet Coins:</span>
+                    <span id="dash-coins" style="color: #ffcc00;">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="rules-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('rules-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Game Rules</h2>
+            <div class="text-modal-content">
+                <h4>In English:</h4>
+                <p>1. Swipe the screen to move and merge similar numbers together.</p>
+                <p>2. Merging two identical numbers creates a bigger number and rewards points.</p>
+                <p>3. In Pro mode, keep track of time. Time is limited for each level!</p>
+                <p>4. Match tiles diagonally, horizontally, or vertically by drawing lines.</p>
+                <p>5. Reach the Target Score to level up automatically.</p>
+                <p>6. Refer a friend and get 10 coins bonus!</p>
+                
+                <h4>हिंदी में:</h4>
+                <p>1. saman numberon ko ek saath le jane aur jodne ke liye screen ko swipe karein.</p>
+                <p>2. Do saman numberon ko milane se ek bada number banta hai aur points milte hain.</p>
+                <p>3. Pro mode mein samay ka dhyan rakhein. Pratyek level ke liye samay seemit hai!</p>
+                <p>4. Line kheenchkar tiles ko tircha, aada ya seedha milaya ja sakta hai.</p>
+                <p>5. Level badhane ke liye Target Score poora karein.</p>
+                <p>6. Dosto ko refer karein aur 10 coin bonus payein!</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModal('terms-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Terms & Conditions</h2>
+            <div class="text-modal-content">
+                <h4>Game Integrity:</h4>
+                <p>If any user tries to hack the game, modify files, or use illegal cheating scripts to make high scores, their account/ID will be permanently blocked without any prior notice.</p>
+                
+                <h4>Game Akhandta:</h4>
+                <p>Agar koi bhi user game ko hack karne, files ko modify karne ya high score banane ke liye avaidh cheating script ka istemal karega, toh uski ID ko bina kisi purv suchna ke hamesha ke liye block kar diya jayega.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="side-menu" id="sidebar-menu">
+        <h3>Game Panel</h3>
+        <button class="side-menu-btn" onclick="openProfileModal()">👤 Profile</button>
+        <button class="side-menu-btn" onclick="handleShareLink()">🔗 Share Button</button>
+        <button class="side-menu-btn" onclick="openGameRules()">📜 Game Rules</button>
+        <button class="side-menu-btn" onclick="openWhatsAppHelp()">📞 Help and Support</button>
+        <button class="side-menu-btn" onclick="openTermConditions()">📋 Term and Conditions</button>
+        <button class="close-menu-btn" onclick="toggleSidebar(false)">Close Menu</button>
+    </div>
+
+    <div class="modal-overlay" id="profile-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeProfileModal()">&times;</span>
+            <h2 style="color: #ffcc00;">Update Profile</h2>
+            
+            <div class="profile-pic-container">
+                <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile">
+                <label for="pic-upload" style="position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); color: white; cursor: pointer; font-size: 12px; padding: 2px 0;">Change</label>
+                <input type="file" id="pic-upload" style="display:none;" accept="image/*" onchange="handleProfilePic(this)">
+            </div>
+
+            <div class="input-group">
+                <label style="color: #ffcc00;">User Name</label>
+                <input type="text" id="prof-name" placeholder="Apna naya naam">
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Mobile Number</label>
+                <input type="tel" id="prof-mobile" placeholder="Naya Mobile Number" readonly>
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Your Refer Code</label>
+                <input type="text" id="prof-refer" style="background:#1a3344; color:#fff" readonly>
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Password</label>
+                <input type="password" id="prof-pass" placeholder="Naya Password set karein">
+                <span class="eye-icon" style="top:25px;" onclick="togglePassVisibility('prof-pass')">👁️</span>
+            </div>
+            
+            <button class="auth-btn" onclick="saveProfileChanges()">Save Profile</button>
+        </div>
+    </div>
+
+    <div id="auth-overlay">
+        <div class="game-title-box">
+            <h1>MATH MERGE</h1>
+            <span>GAME PORTAL</span>
+        </div>
+
+        <div class="auth-card" id="signup-card">
+            <h2 style="color: #ffcc00;">Sign Up</h2>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Username</label>
+                <input type="text" id="signup-name" placeholder="Apna naam likhein">
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Mobile Number</label>
+                <input type="tel" id="signup-mobile" placeholder="Mobile number dalein">
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Refer Code (Optional)</label>
+                <input type="tel" id="signup-refer" placeholder="Dost ka number (Bonus ke liye)">
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Password</label>
+                <input type="password" id="signup-pass" placeholder="Password set karein">
+                <span class="eye-icon" onclick="togglePassVisibility('signup-pass')">👁️</span>
+            </div>
+            <button class="auth-btn" onclick="handleSignup()">Register</button>
+            <div class="switch-text">Pehle se account hai? <span onclick="switchAuth('login')">Login karein</span></div>
+        </div>
+
+        <div class="auth-card" id="login-card" style="display: none;">
+            <h2 style="color: #ffcc00;">Log In</h2>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Mobile Number</label>
+                <input type="tel" id="login-mobile" placeholder="Registered mobile number">
+            </div>
+            <div class="input-group">
+                <label style="color: #ffcc00;">Password</label>
+                <input type="password" id="login-pass" placeholder="Apna password dalein">
+                <span class="eye-icon" onclick="togglePassVisibility('login-pass')">👁️</span>
+                <div class="extra-links">
+                    <span></span>
+                    <span>Forgot your password?</span>
+                </div>
+            </div>
+            <button class="auth-btn" onclick="handleLogin()">Log In</button>
+            <div class="switch-text">Account nahi hai? <span onclick="switchAuth('signup')">Sign Up karein</span></div>
+        </div>
+    </div>
+
+    <div id="mode-overlay">
+        <button id="menu-trigger-btn" onclick="toggleLeftSidebar(true)">☰ Menu</button>
+        
+        <div class="mode-container" style="text-align: center; width: 100%;">
+            <!-- TOP CENTER ADD COINS BUTTON -->
+            <button class="add-coins-top-btn" onclick="openAddCoinsModal()">➕ Add Coins</button>
+
+            <h2 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Select Game Mode</h2>
+            <button class="mode-btn normal-btn" style="background: #2ecc71;" onclick="startGameMode('normal')">Normal Play</button>
+            <button class="mode-btn pro-btn" style="background: #e67e22;" onclick="openRoomDashboard()">Pro Play (Coins)</button>
+
+            <div class="highscore-title">🏆 Normal Mode Top Scores 🏆</div>
+            <div class="highscore-row">
+                <div class="hs-box hs-first">
+                    <img class="hs-profile-pic" id="hs-img-1" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
+                    <div class="rank-text">🥇 First</div>
+                    <div class="score-text" id="high-score-1">0</div>
+                    <div class="user-text" id="user-1">-</div>
+                    <div class="mobile-text" id="mob-1">****</div>
+                </div>
+                <div class="hs-box hs-second">
+                    <img class="hs-profile-pic" id="hs-img-2" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
+                    <div class="rank-text">🥈 Second</div>
+                    <div class="score-text" id="high-score-2">0</div>
+                    <div class="user-text" id="user-2">-</div>
+                    <div class="mobile-text" id="mob-2">****</div>
+                </div>
+                <div class="hs-box hs-third">
+                    <img class="hs-profile-pic" id="hs-img-3" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User">
+                    <div class="rank-text">🥉 Third</div>
+                    <div class="score-text" id="high-score-3">0</div>
+                    <div class="user-text" id="user-3">-</div>
+                    <div class="mobile-text" id="mob-3">****</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="room-overlay">
+        <div class="wallet-display">💰 My Wallet: <span id="wallet-coins">0</span> Coins</div>
+        
+        <div class="auth-card" style="max-width: 100%; width: 100%; margin-bottom: 20px;">
+            <h3 style="color: #ffcc00; margin: 0 0 10px 0;">Create New Room</h3>
+            <div class="input-group">
+                <label style="color:#ffcc00; font-size:12px;">Custom Entry Fee (Coins)</label>
+                <input type="number" id="room-entry-fee" placeholder="Ex: 10, 50, 100" min="1">
+            </div>
+            <div class="input-group">
+                <label style="color:#ffcc00; font-size:12px;">Players Count</label>
+                <select id="room-players">
+                    <option value="2">2 Players Slot</option>
+                    <option value="3">3 Players Slot</option>
+                    <option value="5">5 Players Slot</option>
+                    <option value="10">10 Players Slot</option>
+                </select>
+            </div>
+            <button class="auth-btn" onclick="handleCreateRoom()" style="font-size: 14px;">Create & Play</button>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">
+            <h3 style="color: #ffcc00; margin: 0;">Active Rooms</h3>
+            <button onclick="openRoomHistoryModal()" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;">History</button>
+        </div>
+        
+        <div id="active-rooms-list" style="margin-top: 10px;">
+            </div>
+
+        <button onclick="document.getElementById('room-overlay').style.display='none'" style="margin-top: 20px; padding: 10px; background: #555; color: white; border: none; border-radius: 5px; width: 100%;">Close Dashboard</button>
+    </div>
+
+    <div id="game-over-overlay">
+        <h2>GAME OVER</h2>
+        <p id="game-over-msg">Aapka samay samapt ho gaya!</p>
+        <button id="restart-btn" onclick="resetGame()" style="background-color: #2ecc71; margin-bottom: 10px; width: 200px; padding: 15px; border-radius: 10px;">Dobara Khele</button>
+        <button onclick="backToMenuFromGameOver()" style="background-color: #7f8c8d; width: 200px; padding: 15px; border-radius: 10px;">Back</button>
+    </div>
+
+    <div class="header">
+        <!-- TOP CENTER ADD COINS BUTTON IN GAME PLAY -->
+        <button class="add-coins-top-btn" onclick="openAddCoinsModal()" style="margin: 0 auto 5px auto; padding: 5px 12px; font-size: 12px;">➕ Add Coins</button>
+        
+        <h1>Merge Math Numbers</h1>
+        
+        <div class="top-stats-row">
+            <div class="score-container">Score: <span id="score">0</span></div>
+            <div class="stat-box" id="target-box" style="background-color: #3498db;">Target: <span id="target-score">100</span></div>
+        </div>
+
+        <div class="header-stats">
+            <div class="stat-box" id="timer-box" style="background-color: #e67e22;">Time: <span id="timer">60</span>s</div>
+            <div class="stat-box" id="level-box" style="background-color: #2ecc71;">Level: <span id="level">1</span></div>
+            <button class="sound-btn" id="sound-toggle" onclick="toggleSound()">🔊 Sound: ON</button>
+            <button class="back-btn" id="back-to-menu" onclick="confirmBackToMenu()">⬅ Back</button>
+        </div>
+    </div>
+
+    <div id="grid">
+        <svg id="swipe-canvas">
+            <path id="drawing-line" d="" />
+        </svg>
+
+        <div id="level-up-popup">
+            <h2>LEVEL UP!</h2>
+            <p>Aap Level <span id="popup-level-val">2</span> par aa gaye</p>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="new-game-btn" onclick="resetGame()">Naya Game</button>
+        <div class="instructions">Mobile me <b>Ungli se swipe</b> karein aur computer me <b>Arrow keys</b> dabayein!</div>
+    </div>
+
+    <script>
+        const gridDisplay = document.getElementById('grid');
+        const scoreDisplay = document.getElementById('score');
+        const swipeCanvas = document.getElementById('swipe-canvas');
+        const drawingLine = document.getElementById('drawing-line');
+        const timerDisplay = document.getElementById('timer');
+        const levelDisplay = document.getElementById('level');
+        const targetDisplay = document.getElementById('target-score'); 
+        const gameOverOverlay = document.getElementById('game-over-overlay');
+        const gameOverMsg = document.getElementById('game-over-msg');
+        const levelUpPopup = document.getElementById('level-up-popup');
+        const popupLevelVal = document.getElementById('popup-level-val');
+        const levelBox = document.getElementById('level-box');
+        
+        const size = 6;
+        let squares = [];
+        
+        let score = 0;
+        let level = 1;
+        let nextLevelScore = 100; 
+
+        let timeLeft = 60;
+        let timerId = null;
+        let isGameOver = false;
+        let isSoundOn = true;
+        let audioCtx = null;
+
+        // Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAiAswwCTT03ENPO-oLr3dyac_zuwnUsMY",
+            authDomain: "math-merge-fa42c.firebaseapp.com",
+            projectId: "math-merge-fa42c",
+            storageBucket: "math-merge-fa42c.firebasestorage.app",
+            messagingSenderId: "196288075601",
+            appId: "1:196288075601:web:4b53edcaf71ae171986570",
+            measurementId: "G-H9N3PZ0HCE",
+            databaseURL: "https://math-merge-fa42c-default-rtdb.firebaseio.com/" 
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let gameMode = 'normal'; 
+        let currentUserMobile = null;
+        let userCoins = 0;
+        let activeRoomId = null; // Track current room being played
+        let selectedCoinPackage = 0;
+
+        let normalHighScores = [
+            {score: 0, name: "-", mobile: "****"},
+            {score: 0, name: "-", mobile: "****"},
+            {score: 0, name: "-", mobile: "****"}
+        ];
+
+        // ---------------------------------------------------
+        // ADD COINS & PAYMENT LOGIC (UPDATED WITH MULTICLICK GUARD)
+        // ---------------------------------------------------
+        function openAddCoinsModal() {
+            if(!currentUserMobile) { alert("Please login first!"); return; }
+            document.getElementById('add-coins-modal').style.display = 'flex';
+            resetCoinSelection(); // Show step 1 first
+        }
+
+        function selectCoinPackage(amount) {
+            selectedCoinPackage = amount;
+            document.getElementById('selected-coin-text').innerText = amount;
+            
+            // Hide selection step, show payment step
+            document.getElementById('coin-selection-step').style.display = 'none';
+            document.getElementById('payment-step').style.display = 'block';
+
+            // Fetch dynamic QR code from admin setting in Firebase
+            database.ref('system/payment_qr').on('value', snap => {
+                if(snap.exists()) {
+                    const qrUrl = snap.val();
+                    const qrImg = document.getElementById('admin-qr-img');
+                    if(qrImg) {
+                        qrImg.src = qrUrl;
+                    }
+                }
+            });
+        }
+
+        function resetCoinSelection() {
+            selectedCoinPackage = 0;
+            document.getElementById('coin-selection-step').style.display = 'block';
+            document.getElementById('payment-step').style.display = 'none';
+            document.getElementById('deposit-txid').value = '';
+            document.getElementById('deposit-screenshot').value = '';
+            const submitBtn = document.getElementById('submit-deposit-btn');
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Submit Request";
+        }
+
+        function submitDepositRequest() {
+            const txId = document.getElementById('deposit-txid').value.trim();
+            const fileInput = document.getElementById('deposit-screenshot');
+            const submitBtn = document.getElementById('submit-deposit-btn');
+
+            if(!txId) { alert("Kripya Transaction ID dalein!"); return; }
+            if(!fileInput.files || !fileInput.files[0]) { alert("Kripya payment ka screenshot upload karein!"); return; }
+
+            // Double click / Multiple submission protection
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting Please Wait...";
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                
+                database.ref('users/' + currentUserMobile).once('value').then(snap => {
+                    const userData = snap.val() || {};
+                    const depositData = {
+                        mobile: currentUserMobile,
+                        name: userData.name || "Unknown",
+                        coinsRequested: selectedCoinPackage,
+                        txId: txId,
+                        screenshot: base64Image,
+                        status: "Pending",
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
+
+                    database.ref('deposits').push(depositData).then(() => {
+                        alert("Deposit request successfully submit ho gayi hai! Admin verify karke coins add kar dega.");
+                        resetCoinSelection();
+                        closeModal('add-coins-modal');
+                    }).catch(err => {
+                        alert("Error: " + err.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Submit Request";
+                    });
+                });
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        }
+
+        function openDepositHistory() {
+            if(!currentUserMobile) return;
+            const historyList = document.getElementById('deposit-history-list');
+            historyList.innerHTML = 'Loading deposit history...';
+            document.getElementById('deposit-history-modal').style.display = 'flex';
+
+            database.ref('deposits').orderByChild('mobile').equalTo(currentUserMobile).once('value').then(snap => {
+                const data = snap.val();
+                historyList.innerHTML = '';
+                if(!data) { historyList.innerHTML = '<p>Koi deposit history nahi mili.</p>'; return; }
+
+                Object.values(data).reverse().forEach(item => {
+                    const statusColor = item.status === 'Successful' ? '#2ecc71' : '#f1c40f';
+                    const div = document.createElement('div');
+                    div.className = 'deposit-history-item';
+                    div.innerHTML = `
+                        <div><b>Coins:</b> ${item.coinsRequested || 'N/A'} | <b>TxID:</b> ${item.txId}</div>
+                        <div><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${item.status}</span></div>
+                    `;
+                    historyList.appendChild(div);
+                });
+            });
+        }
+
+        // ---------------------------------------------------
+        // REALTIME LAST LOGIN UPDATE FUNCTION
+        // ---------------------------------------------------
+        function updateLastLogin(mobile) {
+            if(!mobile) return;
+            database.ref('users/' + mobile).update({
+                lastLogin: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        // ---------------------------------------------------
+        // WALLET & ROOM LOGIC (NEW FUNCTIONS)
+        // ---------------------------------------------------
+
+        function openRoomDashboard() {
+            document.getElementById('room-overlay').style.display = 'flex';
+            fetchUserData();
+            fetchActiveRooms();
+        }
+
+        function fetchUserData() {
+            if(!currentUserMobile) return;
+            database.ref('users/' + currentUserMobile).on('value', (snap) => {
+                const data = snap.val();
+                if(data) {
+                    userCoins = data.coins || 0;
+                    score = data.lastScore || 0;
+                    level = data.lastLevel || 1;
+                    scoreDisplay.innerText = score;
+                    levelDisplay.innerText = level;
+                    document.getElementById('wallet-coins').innerText = userCoins;
+                    document.getElementById('dash-coins').innerText = userCoins;
+                    document.getElementById('dash-refercode').innerText = data.mobile;
+                    document.getElementById('prof-refer').value = data.mobile;
+                }
+            });
+        }
+
+        function fetchActiveRooms() {
+            database.ref('rooms').orderByChild('status').equalTo('active').on('value', (snap) => {
+                const rooms = snap.val();
+                const listDiv = document.getElementById('active-rooms-list');
+                listDiv.innerHTML = '';
+                if(!rooms) { listDiv.innerHTML = '<p style="color:#777">No active rooms found.</p>'; return; }
+
+                Object.keys(rooms).forEach(id => {
+                    const room = rooms[id];
+                    const playedCount = room.scores ? Object.keys(room.scores).length : 0;
+                    const hasPlayed = room.scores && room.scores[currentUserMobile];
+                    const totalPrize = (room.entryFee * room.maxPlayers) * 0.8;
+
+                    const card = document.createElement('div');
+                    card.className = 'room-card';
+                    card.innerHTML = `
+                        <div class="room-info">
+                            <h4>Room #${id.slice(-5)}</h4>
+                            <p>Fee: ${room.entryFee} | Slots: ${playedCount}/${room.maxPlayers}</p>
+                            <p style="color:#2ecc71">Winner Gets: ${totalPrize.toFixed(0)} Coins</p>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:5px;">
+                            <button class="auth-btn" style="width:auto; padding:5px 15px; margin:0; background:#3498db; font-size:12px;" 
+                                onclick="showRoomRankings('${id}')">
+                                Rank
+                            </button>
+                            <button class="auth-btn" style="width:auto; padding:5px 15px; margin:0;" 
+                                onclick="joinRoom('${id}')" ${hasPlayed ? 'disabled' : ''}>
+                                ${hasPlayed ? 'Played' : 'Join'}
+                            </button>
+                        </div>
+                    `;
+                    listDiv.appendChild(card);
+                });
+            });
+        }
+
+        function openRoomHistoryModal() {
+            const listDiv = document.getElementById('room-history-list');
+            listDiv.innerHTML = 'History load ho rahi hai...';
+            document.getElementById('room-history-modal').style.display = 'flex';
+
+            database.ref('rooms').orderByChild('status').equalTo('completed').limitToLast(15).once('value').then(snap => {
+                const rooms = snap.val();
+                listDiv.innerHTML = '';
+                if(!rooms) { listDiv.innerHTML = '<p>Koi history nahi mili.</p>'; return; }
+
+                Object.keys(rooms).reverse().forEach(id => {
+                    const room = rooms[id];
+                    const div = document.createElement('div');
+                    div.className = 'history-entry';
+                    
+                    let rankHtml = '';
+                    if(room.scores) {
+                        const sorted = Object.values(room.scores).sort((a,b) => b.score - a.score).slice(0, 3);
+                        sorted.forEach((p, index) => {
+                            rankHtml += `
+                                <div class="history-player">
+                                    <span>${index + 1}. ${p.name}</span>
+                                    <span>Score: ${p.score}</span>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    div.innerHTML = `
+                        <div style="color:#ffcc00; font-weight:bold;">Room #${id.slice(-5)}</div>
+                        <div style="font-size:12px; margin:4px 0;">Final Winner: <span style="color:#2ecc71">${room.winnerName || "N/A"}</span></div>
+                        <div style="font-size:12px;">Prize Pool: ${room.entryFee * room.maxPlayers} Coins</div>
+                        <div class="history-rank-box">
+                            <div style="font-size:10px; color:#ffcc00; margin-bottom:4px; font-weight:bold;">TOP RANKERS:</div>
+                            ${rankHtml}
+                        </div>
+                    `;
+                    listDiv.appendChild(div);
+                });
+            });
+        }
+
+        function showRoomRankings(roomId) {
+            database.ref('rooms/' + roomId + '/scores').once('value').then(snap => {
+                const scores = snap.val();
+                const container = document.getElementById('rank-data-container');
+                container.innerHTML = '';
+                
+                if(!scores) {
+                    container.innerHTML = '<p style="padding:10px;">Abhi kisi ne nahi khela.</p>';
+                } else {
+                    const sortedScores = Object.values(scores).sort((a, b) => b.score - a.score);
+                    sortedScores.forEach(entry => {
+                        const div = document.createElement('div');
+                        div.className = 'rank-entry';
+                        div.innerHTML = `<span>${entry.name || "Unknown"}</span> <span>${entry.score}</span>`;
+                        container.appendChild(div);
+                    });
+                }
+                document.getElementById('rank-modal').style.display = 'flex';
+            });
+        }
+
+        function handleCreateRoom() {
+            const feeInput = document.getElementById('room-entry-fee').value;
+            const fee = parseInt(feeInput);
+            const players = parseInt(document.getElementById('room-players').value);
+
+            if(!fee || fee <= 0) { alert("Sahi Entry Fee dalein!"); return; }
+
+            if(userCoins < fee) {
+                alert("Insufficient Coins! Please add more coins to your wallet.");
+                return;
+            }
+
+            const roomId = 'ROOM_' + Date.now();
+            const roomData = {
+                id: roomId,
+                creator: currentUserMobile,
+                entryFee: fee,
+                maxPlayers: players,
+                status: 'active',
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            database.ref('users/' + currentUserMobile + '/coins').set(userCoins - fee).then(() => {
+                database.ref('rooms/' + roomId).set(roomData).then(() => {
+                    activeRoomId = roomId;
+                    startGameMode('pro');
+                    document.getElementById('room-overlay').style.display = 'none';
+                    alert("Room Created! Your score will be saved automatically.");
+                });
+            });
+        }
+
+        function joinRoom(roomId) {
+            database.ref('rooms/' + roomId).once('value').then(snap => {
+                const room = snap.val();
+                if(userCoins < room.entryFee) { alert("Insufficient Coins!"); return; }
+                
+                database.ref('users/' + currentUserMobile + '/coins').set(userCoins - room.entryFee).then(() => {
+                    activeRoomId = roomId;
+                    startGameMode('pro');
+                    document.getElementById('room-overlay').style.display = 'none';
+                });
+            });
+        }
+
+        function saveProScore() {
+            if(!activeRoomId || !currentUserMobile) return;
+
+            database.ref('users/' + currentUserMobile).once('value').then(userSnap => {
+                const userData = userSnap.val();
+                const userScoreData = {
+                    score: score,
+                    name: userData.name || "Player",
+                    mobile: currentUserMobile,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+
+                database.ref('rooms/' + activeRoomId + '/scores/' + currentUserMobile).set(userScoreData).then(() => {
+                    checkRoomCompletion(activeRoomId);
+                });
+            });
+        }
+
+        function checkRoomCompletion(roomId) {
+            database.ref('rooms/' + roomId).once('value').then(snap => {
+                const room = snap.val();
+                if(!room || room.status !== 'active') return;
+
+                const scores = room.scores || {};
+                const playedCount = Object.keys(scores).length;
+
+                if(playedCount >= room.maxPlayers) {
+                    let winnerMobile = null;
+                    let highScore = -1;
+                    let winnerName = "";
+
+                    Object.keys(scores).forEach(mob => {
+                        if(scores[mob].score > highScore) {
+                            highScore = scores[mob].score;
+                            winnerMobile = mob;
+                            winnerName = scores[mob].name;
+                        }
+                    });
+
+                    const totalPool = room.entryFee * room.maxPlayers;
+                    const winningAmount = Math.floor(totalPool * 0.8);
+
+                    database.ref('users/' + winnerMobile + '/coins').transaction(current => (current || 0) + winningAmount);
+                    
+                    database.ref('users/' + winnerMobile + '/winHistory').push({
+                        roomId: roomId,
+                        amount: winningAmount,
+                        score: highScore,
+                        date: new Date().toLocaleDateString()
+                    });
+
+                    database.ref('rooms/' + roomId).update({
+                        status: 'completed',
+                        winner: winnerMobile,
+                        winnerName: winnerName,
+                        completedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                }
+            });
+        }
+
+        function openWinHistory() {
+            toggleLeftSidebar(false);
+            const historyList = document.getElementById('win-history-list');
+            historyList.innerHTML = 'Loading...';
+            
+            database.ref('users/' + currentUserMobile + '/winHistory').once('value').then(snap => {
+                historyList.innerHTML = '';
+                const history = snap.val();
+                if(!history) { historyList.innerHTML = 'No wins yet. Keep playing!'; return; }
+
+                Object.values(history).reverse().forEach(win => {
+                    const div = document.createElement('div');
+                    div.className = 'win-history-item';
+                    div.innerHTML = `🏆 Won <b>${win.amount} Coins</b><br><small>Score: ${win.score} | Date: ${win.date}</small>`;
+                    historyList.appendChild(div);
+                });
+                document.getElementById('history-modal').style.display = 'flex';
+            });
+        }
+
+        // ---------------------------------------------------
+        // EXISTING GAME FUNCTIONS (MODIFIED)
+        // ---------------------------------------------------
+
+        function togglePassVisibility(id) {
+            const input = document.getElementById(id);
+            if (input.type === "password") input.type = "text";
+            else input.type = "password";
+        }
+
+        function switchAuth(type) {
+            if (type === 'login') {
+                document.getElementById('signup-card').style.display = 'none';
+                document.getElementById('login-card').style.display = 'block';
+            } else {
+                document.getElementById('signup-card').style.display = 'block';
+                document.getElementById('login-card').style.display = 'none';
+            }
+        }
+
+        function handleSignup() {
+            const name = document.getElementById('signup-name').value.trim();
+            const mobile = document.getElementById('signup-mobile').value.trim();
+            const refer = document.getElementById('signup-refer').value.trim();
+            const pass = document.getElementById('signup-pass').value.trim();
+            
+            if (!name || !mobile || !pass) { alert("Kripya sari details bharein!"); return; }
+
+            database.ref('users/' + mobile).once('value').then((snapshot) => {
+                if (snapshot.exists()) alert("Yeh mobile number pehle se registered hai!");
+                else {
+                    let initialCoins = 10;
+                    if(refer) {
+                        database.ref('users/' + refer).once('value').then(refSnap => {
+                            if(refSnap.exists()) {
+                                initialCoins = 20;
+                                database.ref('users/' + refer + '/coins').transaction(c => (c || 0) + 10);
+                                finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! Valid refer code ki vajah se 20 Coins mile hain.");
+                            } else {
+                                finalizeSignup(name, mobile, pass, 10, "Refer code galat hai, par signup ho gaya! 10 Coins mile hain.");
+                            }
+                        });
+                    } else {
+                        finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! 10 Coins Bonus mile hain. Ab login karein.");
+                    }
+                }
+            });
+        }
+
+        function finalizeSignup(name, mobile, pass, coins, msg) {
+            database.ref('users/' + mobile).set({
+                name: name, mobile: mobile, pass: pass,
+                profilePic: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+                coins: coins,
+                lastLevel: 1,
+                lastScore: 0,
+                lastLogin: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => { 
+                alert(msg); 
+                switchAuth('login'); 
+            });
+        }
+
+        function handleLogin() {
+            const mobile = document.getElementById('login-mobile').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            if (!mobile || !pass) { alert("Sari details bharna zaroori hai!"); return; }
+            database.ref('users/' + mobile).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    if (user.pass === pass) {
+                        currentUserMobile = mobile;
+                        localStorage.setItem('currentUserMobile', mobile);
+                        updateLastLogin(mobile);
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        document.getElementById('mode-overlay').style.display = 'flex';
+                        fetchUserData();
+                        fetchGlobalScores(); 
+                    } else alert("Galat Password!");
+                } else alert("Yeh mobile number registered nahi hai!");
+            });
+        }
+
+        function fetchGlobalScores() {
+            database.ref('globalHighScores').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && Array.isArray(data)) normalHighScores = data;
+                updateHighScoreDisplay();
+            });
+        }
+
+        function updateHighScoreDisplay() {
+            for (let i = 0; i < 3; i++) {
+                const record = normalHighScores[i] || {score: 0, name: "-", mobile: "****", profilePic: "https://cdn-icons-png.flaticon.com/512/149/149071.png"};
+                document.getElementById(`high-score-${i+1}`).innerHTML = record.score;
+                document.getElementById(`user-${i+1}`).innerHTML = record.name;
+                document.getElementById(`mob-${i+1}`).innerHTML = record.mobile;
+                document.getElementById(`hs-img-${i+1}`).src = record.profilePic || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+            }
+        }
+
+        function checkAndSaveHighScore() {
+            if (!currentUserMobile) return;
+            
+            if(gameMode === 'pro' && activeRoomId) {
+                saveProScore();
+            }
+
+            database.ref('users/' + currentUserMobile).once('value').then((snapshot) => {
+                const activeUser = snapshot.val() || {};
+                const userName = activeUser.name || "Unknown";
+                const lastFourDigits = currentUserMobile.slice(-4);
+                
+                if(gameMode === 'normal') {
+                    normalHighScores.push({
+                        score: score, name: userName, mobile: "..." + lastFourDigits,
+                        profilePic: activeUser.profilePic || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    });
+                    normalHighScores.sort((a, b) => b.score - a.score);
+                    normalHighScores = normalHighScores.slice(0, 3);
+                    database.ref('globalHighScores').set(normalHighScores);
+                }
+                
+                database.ref('users/' + currentUserMobile).update({
+                    lastLevel: level,
+                    lastScore: score
+                });
+            });
+        }
+
+        function startGameMode(mode) {
+            gameMode = mode;
+            document.getElementById('mode-overlay').style.display = 'none';
+            document.getElementById('timer-box').style.display = (mode === 'normal') ? 'none' : 'block';
+            resetGame();
+        }
+
+        function confirmBackToMenu() {
+            if (confirm("Kya aap game Quit karna chahte hain? Aapka current score save kiya jayega.")) {
+                triggerGameOver("quit");
+            }
+        }
+
+        function backToMenu() { 
+            clearInterval(timerId); 
+            checkAndSaveHighScore(); 
+            activeRoomId = null; 
+            document.getElementById('mode-overlay').style.display = 'flex'; 
+        }
+
+        function backToMenuFromGameOver() { 
+            gameOverOverlay.style.display = 'none'; 
+            activeRoomId = null;
+            document.getElementById('mode-overlay').style.display = 'flex'; 
+        }
+
+        function toggleSidebar(show) { const sidebar = document.getElementById('sidebar-menu'); if (show) sidebar.classList.add('active'); else sidebar.classList.remove('active'); }
+        
+        function openProfileModal() {
+            toggleSidebar(false);
+            if (!currentUserMobile) return;
+            database.ref('users/' + currentUserMobile).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    document.getElementById('prof-name').value = user.name;
+                    document.getElementById('prof-mobile').value = user.mobile;
+                    document.getElementById('prof-pass').value = user.pass;
+                    document.getElementById('prof-refer').value = user.mobile;
+                    document.getElementById('profile-img').src = user.profilePic || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    document.getElementById('profile-modal').style.display = 'flex';
+                }
+            });
+        }
+
+        function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
+        function handleProfilePic(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = (e) => document.getElementById('profile-img').src = e.target.result; reader.readAsDataURL(input.files[0]); } }
+        
+        function saveProfileChanges() {
+            const newName = document.getElementById('prof-name').value.trim();
+            const newPass = document.getElementById('prof-pass').value.trim();
+            const profilePicData = document.getElementById('profile-img').src;
+            if (!newName || !newPass) { alert("Details khali nahi ho sakte!"); return; }
+            database.ref('users/' + currentUserMobile).update({ name: newName, pass: newPass, profilePic: profilePicData }).then(() => { alert("Profile update ho gayi!"); closeProfileModal(); });
+        }
+
+        function toggleLeftSidebar(show) { const sidebar = document.getElementById('left-sidebar-menu'); if (show) sidebar.classList.add('active'); else sidebar.classList.remove('active'); }
+        function openProfileModalFromSidebar() { toggleLeftSidebar(false); openProfileModal(); }
+        
+        function handleShareLink() { 
+            const link = "https://imran13144.github.io/Tic-Tac-Toe-Dawnload/"; 
+            const msg = `Hey! Join me on Merge Math Game. Mere saath khele aur coins jeetein. Mera Refer Code hai: ${currentUserMobile}. Game Link: ${link}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Math Merge Game',
+                    text: msg,
+                    url: link,
+                }).catch(err => {
+                    navigator.clipboard.writeText(msg).then(() => alert('Share message copied!'));
+                });
+            } else {
+                navigator.clipboard.writeText(msg).then(() => alert('Share message copied! Dosto ko bhej kar refer bonus payein.'));
+            }
+        }
+
+        function openGameRules() { document.getElementById('rules-modal').style.display = 'flex'; }
+        function openTermConditions() { document.getElementById('terms-modal').style.display = 'flex'; }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function openWhatsAppHelp() { window.open("https://wa.me/+966578913144", '_blank'); }
+        
+        function handleLogout() {
+            if (confirm("Log out?")) { localStorage.removeItem('currentUserMobile'); currentUserMobile = null; toggleLeftSidebar(false); document.getElementById('mode-overlay').style.display = 'none'; document.getElementById('auth-overlay').style.display = 'flex'; switchAuth('login'); }
+        }
+        
+        function openMathMergeDashboard() {
+            toggleLeftSidebar(false);
+            database.ref('users/' + currentUserMobile).once('value').then((snapshot) => {
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    document.getElementById('dash-username').innerHTML = user.name;
+                    document.getElementById('dash-mobile').innerHTML = user.mobile;
+                    document.getElementById('dash-refercode').innerHTML = user.mobile;
+                    document.getElementById('dash-score').innerHTML = user.lastScore || score;
+                    document.getElementById('dash-level').innerHTML = user.lastLevel || level;
+                    document.getElementById('dash-mode').innerHTML = gameMode.toUpperCase();
+                    document.getElementById('dash-coins').innerHTML = user.coins || 0;
+                }
+                document.getElementById('dashboard-modal').style.display = 'flex';
+            });
+        }
+
+        function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function toggleSound() { isSoundOn = !isSoundOn; const btn = document.getElementById('sound-toggle'); btn.innerHTML = isSoundOn ? "🔊 Sound: ON" : "🔈 Sound: OFF"; btn.style.background = isSoundOn ? "#9b59b6" : "#95a5a6"; }
+
+        function playSwipeSoundLoud() {
+            if (!isSoundOn) return; initAudioContext();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playJoinSoundLoud() {
+            if (!isSoundOn) return; initAudioContext();
+            const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc1.type = 'sine'; osc2.type = 'square'; osc1.frequency.setValueAtTime(500, audioCtx.currentTime); osc2.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination); osc1.start(); osc2.start(); osc1.stop(audioCtx.currentTime + 0.3); osc2.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playLevelUpSound() {
+            if (!isSoundOn) return; const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const playBeep = (freq, startTime, duration) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, startTime); gain.gain.setValueAtTime(0.1, startTime); gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration); };
+            playBeep(400, audioCtx.currentTime, 0.15); playBeep(600, audioCtx.currentTime + 0.15, 0.15); playBeep(800, audioCtx.currentTime + 0.30, 0.3);
+        }
+
+        function createBoard() {
+            const svgLayer = document.getElementById('swipe-canvas');
+            gridDisplay.innerHTML = ''; gridDisplay.appendChild(svgLayer);
+            squares = [];
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < size * size; i++) {
+                let cell = document.createElement('div'); cell.classList.add('cell');
+                let randomVal = getNewTileValue(); cell.innerHTML = randomVal; applyTileColor(cell, randomVal);
+                fragment.appendChild(cell); squares.push(cell);
+            }
+            gridDisplay.appendChild(fragment);
+            checkForPossibleMoves();
+        }
+
+        function applyTileColor(element, val) {
+            element.classList.remove('n-high');
+            if (val <= 10) {
+                element.className = 'cell n' + val;
+            } else if (val === 12) {
+                element.className = 'cell n12';
+            } else if (val === 16) {
+                element.className = 'cell n16';
+            } else {
+                element.className = 'cell n-high';
+                element.style.backgroundColor = 'hsl(' + (val % 360) + ', 70%, 50%)';
+            }
+        }
+
+        function getNewTileValue() {
+            let val; let attempts = 0;
+            while (attempts < 50) {
+                val = Math.floor(Math.random() * 5) + 1;
+                if (level >= 10 && val === 9) { attempts++; continue; }
+                if (level >= 9 && val === 8) { attempts++; continue; }
+                if (level >= 8 && val === 7) { attempts++; continue; }
+                if (level >= 7 && val === 6) { attempts++; continue; }
+                if (level >= 6 && val === 5) { attempts++; continue; }
+                if (level >= 5 && val === 4) { attempts++; continue; }
+                if (level >= 4 && val === 3) { attempts++; continue; }
+                if (level >= 3 && val === 2) { attempts++; continue; }
+                if (level >= 2 && val === 1) { attempts++; continue; }
+                return val;
+            }
+            return level + 1;
+        }
+
+        function refillGrid() {
+            let emptySpaces = false;
+            for (let i = 0; i < squares.length; i++) {
+                if (squares[i].innerHTML === '' || squares[i].innerHTML === '0') {
+                    let randomVal = getNewTileValue(); squares[i].innerHTML = randomVal; applyTileColor(squares[i], randomVal); emptySpaces = true;
+                }
+            }
+            updateStyles(); 
+            checkForPossibleMoves();
+            return emptySpaces;
+        }
+
+        function checkForPossibleMoves() {
+            for (let i = 0; i < squares.length; i++) {
+                let val = squares[i].innerHTML;
+                if (!val || val === '0') continue;
+
+                let row = Math.floor(i / size);
+                let col = i % size;
+
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        let nr = row + dr, nc = col + dc;
+                        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+                            let neighborIdx = nr * size + nc;
+                            if (squares[neighborIdx].innerHTML === val) return true;
+                        }
+                    }
+                }
+            }
+            triggerGameOver("nomoves");
+            return false;
+        }
+
+        function startTimerSystem() { clearInterval(timerId); if (gameMode === 'normal') return; timerId = setInterval(() => { if (!isGameOver) { timeLeft--; timerDisplay.innerHTML = timeLeft; if (timeLeft <= 0) triggerGameOver("timeout"); } }, 1000); }
+        function resetTimerForCurrentLevel() { if (gameMode === 'normal') return; if (level === 1) timeLeft = 60; else if (level === 2) timeLeft = 55; else if (level === 3) timeLeft = 50; else if (level === 4) timeLeft = 45; else if (level === 5) timeLeft = 40; else timeLeft = 30; timerDisplay.innerHTML = timeLeft; }
+
+        function removeBlockedTilesFromBoard() {
+            for (let i = 0; i < squares.length; i++) {
+                let currentVal = parseInt(squares[i].innerHTML); let isBlocked = false;
+                if (level >= 2 && currentVal === 1) isBlocked = true;
+                if (isBlocked) { 
+                    let newVal = getNewTileValue(); 
+                    squares[i].innerHTML = newVal; 
+                    applyTileColor(squares[i], newVal);
+                }
+            }
+            updateStyles();
+        }
+
+        function showLevelUpPopup() {
+            popupLevelVal.innerHTML = level; playLevelUpSound();
+            levelBox.classList.add('level-scroll-anim'); setTimeout(() => levelBox.classList.remove('level-scroll-anim'), 1000);
+            levelUpPopup.style.display = 'block'; setTimeout(() => levelUpPopup.classList.add('active'), 10);
+            setTimeout(() => { levelUpPopup.classList.remove('active'); setTimeout(() => levelUpPopup.style.display = 'none', 500); }, 1500);
+        }
+
+        function checkLevelUp() {
+            if (score >= nextLevelScore) {
+                level++;
+                let previousTarget = nextLevelScore;
+                nextLevelScore = Math.floor((previousTarget * 1.4) + (level * 10));
+                updateLevelUI();
+                resetTimerForCurrentLevel(); 
+                showLevelUpPopup(); 
+                removeBlockedTilesFromBoard(); 
+                checkLevelUp();
+            }
+        }
+
+        function updateLevelUI() {
+            levelDisplay.innerHTML = level;
+            targetDisplay.innerHTML = nextLevelScore;
+            scoreDisplay.innerHTML = score;
+        }
+
+        function triggerGameOver(reason) { 
+            isGameOver = true; 
+            clearInterval(timerId); 
+            checkAndSaveHighScore(); 
+
+            if (reason === "timeout") {
+                gameOverMsg.innerHTML = "Aapka samay samapt ho gaya!";
+            } else if (reason === "nomoves") {
+                gameOverMsg.innerHTML = "Koi bhi box same nahi hai! Game Over.";
+            } else if (reason === "quit") {
+                gameOverMsg.innerHTML = "Aapne game Quit kiya. Score save ho gaya hai.";
+            }
+
+            if (gameMode === 'pro') {
+                document.getElementById('restart-btn').style.display = 'none';
+            } else {
+                document.getElementById('restart-btn').style.display = 'block';
+            }
+
+            gameOverOverlay.style.display = 'flex'; 
+        }
+
+        function updateStyles() { 
+            for (let i = 0; i < squares.length; i++) { 
+                let val = squares[i].innerHTML;
+                if (val !== '' && val !== '0') {
+                    applyTileColor(squares[i], parseInt(val));
+                }
+            } 
+        }
+
+        function triggerPopEffect(element) { const existing = document.querySelector('.pop-effect'); if (existing) existing.classList.remove('pop-effect'); element.classList.add('pop-effect'); }
+
+        let selectedPath = []; let isSwiping = false; let currentValue = null;
+        
+        function getCellIndexFromPoint(x, y) { 
+            const rect = gridDisplay.getBoundingClientRect(); 
+            const cellW = rect.width / size; const cellH = rect.height / size;
+            const col = Math.floor((x - rect.left) / cellW); const row = Math.floor((y - rect.top) / cellH); 
+            if (col >= 0 && col < size && row >= 0 && row < size) return row * size + col; 
+            return null; 
+        }
+        
+        function handleSwipeMove(clientX, clientY) {
+            if (!isSwiping || isGameOver) return;
+            const idx = getCellIndexFromPoint(clientX, clientY);
+            if (idx !== null) {
+                const val = squares[idx].innerHTML;
+                if (val !== '' && val !== '0') {
+                    if (selectedPath.length === 0) { currentValue = val; selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
+                    else if (selectedPath.length >= 2 && idx === selectedPath[selectedPath.length - 2]) { let rem = selectedPath.pop(); squares[rem].classList.remove('selected-cell'); }
+                    else if (val === currentValue && !selectedPath.includes(idx)) {
+                        const last = selectedPath[selectedPath.length - 1];
+                        const r1 = Math.floor(last/size), c1 = last%size, r2 = Math.floor(idx/size), c2 = idx%size;
+                        if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) { selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
+                    }
+                    updateSwipeLine();
+                }
+            }
+        }
+
+        function updateSwipeLine() {
+            if (selectedPath.length < 1) { drawingLine.style.opacity = '0'; return; }
+            drawingLine.style.opacity = '1';
+            const rect = gridDisplay.getBoundingClientRect();
+            let d = '';
+            selectedPath.forEach((idx, i) => {
+                const cRect = squares[idx].getBoundingClientRect();
+                const cx = (cRect.left - rect.left) + (cRect.width / 2);
+                const cy = (cRect.top - rect.top) + (cRect.height / 2);
+                if (i === 0) d += `M ${cx} ${cy}`; else d += ` L ${cx} ${cy}`;
+            });
+            drawingLine.setAttribute('d', d);
+        }
+
+        function endSwipe() {
+            if (!isSwiping || isGameOver) return; 
+            isSwiping = false; 
+            drawingLine.style.opacity = '0';
+            selectedPath.forEach(idx => squares[idx].classList.remove('selected-cell'));
+            if (selectedPath.length >= 2) {
+                let total = 0; let lastIdx = selectedPath[selectedPath.length - 1];
+                selectedPath.forEach(idx => { total += parseInt(squares[idx].innerHTML); squares[idx].innerHTML = ''; });
+                squares[lastIdx].innerHTML = total; applyTileColor(squares[lastIdx], total); score += total; 
+                checkLevelUp(); updateLevelUI(); triggerPopEffect(squares[lastIdx]); playJoinSoundLoud(); resetTimerForCurrentLevel();
+                setTimeout(refillGrid, 100);
+            }
+            selectedPath = []; currentValue = null; updateStyles();
+        }
+
+        gridDisplay.addEventListener('touchstart', (e) => { isSwiping = true; handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
+        gridDisplay.addEventListener('touchmove', (e) => { handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
+        gridDisplay.addEventListener('touchend', endSwipe);
+        gridDisplay.addEventListener('mousedown', (e) => { isSwiping = true; handleSwipeMove(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e) => { if(isSwiping) handleSwipeMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', endSwipe);
+
+        function resetGame() { 
+            score = 0; level = 1; nextLevelScore = 100;
+            timeLeft = 60; isGameOver = false; 
+            updateLevelUI(); timerDisplay.innerHTML = 60; 
+            gameOverOverlay.style.display = 'none'; 
+            levelUpPopup.style.display = 'none'; 
+            document.getElementById('restart-btn').style.display = 'block';
+            createBoard(); 
+            startTimerSystem(); 
+        }
+        
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('currentUserMobile');
+            if (saved) { 
+                database.ref('users/' + saved).once('value').then((snap) => { 
+                    if (snap.exists()) { 
+                        currentUserMobile = saved; 
+                        updateLastLogin(saved);
+                        document.getElementById('auth-overlay').style.display = 'none'; 
+                        document.getElementById('mode-overlay').style.display = 'flex'; 
+                        fetchUserData();
+                        fetchGlobalScores(); 
+                    } 
+                }); 
+            }
+        });
+
+        createBoard();
+    </script>
+</body>
+</html>
