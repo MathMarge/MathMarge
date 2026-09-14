@@ -1238,7 +1238,7 @@
 
         // Firebase Config
         const firebaseConfig = {
-            apiKey: "AIzaSyAiAswwCTT03ENPO-oLr3dyac_zuwnUsMY",
+            apiKey: "AIzaSyA5LxqMPqhnCQ4pD71AfNzulLSVacf1G7g",
             authDomain: "math-merge-fa42c.firebaseapp.com",
             projectId: "math-merge-fa42c",
             storageBucket: "math-merge-fa42c.firebasestorage.app",
@@ -1634,7 +1634,7 @@
         }
 
         // ---------------------------------------------------
-        // EXISTING GAME FUNCTIONS (MODIFIED)
+        // EXISTING GAME FUNCTIONS & LOGIC
         // ---------------------------------------------------
 
         function togglePassVisibility(id) {
@@ -1867,276 +1867,282 @@
         function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function toggleSound() { isSoundOn = !isSoundOn; const btn = document.getElementById('sound-toggle'); btn.innerHTML = isSoundOn ? "🔊 Sound: ON" : "🔈 Sound: OFF"; btn.style.background = isSoundOn ? "#9b59b6" : "#95a5a6"; }
 
-        function playSwipeSoundLoud() {
-            if (!isSoundOn) return; initAudioContext();
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.08);
-        }
-
-        function playJoinSoundLoud() {
-            if (!isSoundOn) return; initAudioContext();
-            const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc1.type = 'sine'; osc2.type = 'square'; osc1.frequency.setValueAtTime(500, audioCtx.currentTime); osc2.frequency.setValueAtTime(1000, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination); osc1.start(); osc2.start(); osc1.stop(audioCtx.currentTime + 0.3); osc2.stop(audioCtx.currentTime + 0.3);
-        }
-
-        function playLevelUpSound() {
-            if (!isSoundOn) return; const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const playBeep = (freq, startTime, duration) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, startTime); gain.gain.setValueAtTime(0.1, startTime); gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration); };
-            playBeep(400, audioCtx.currentTime, 0.15); playBeep(600, audioCtx.currentTime + 0.15, 0.15); playBeep(800, audioCtx.currentTime + 0.30, 0.3);
-        }
-
+        // Core Game Initialization & Board Setup
         function createBoard() {
-            const svgLayer = document.getElementById('swipe-canvas');
-            gridDisplay.innerHTML = ''; gridDisplay.appendChild(svgLayer);
+            gridDisplay.innerHTML = '';
+            gridDisplay.appendChild(swipeCanvas);
+            gridDisplay.appendChild(levelUpPopup);
             squares = [];
-            const fragment = document.createDocumentFragment();
             for (let i = 0; i < size * size; i++) {
-                let cell = document.createElement('div'); cell.classList.add('cell');
-                let randomVal = getNewTileValue(); cell.innerHTML = randomVal; applyTileColor(cell, randomVal);
-                fragment.appendChild(cell); squares.push(cell);
-            }
-            gridDisplay.appendChild(fragment);
-            checkForPossibleMoves();
-        }
-
-        function applyTileColor(element, val) {
-            element.classList.remove('n-high');
-            if (val <= 10) {
-                element.className = 'cell n' + val;
-            } else if (val === 12) {
-                element.className = 'cell n12';
-            } else if (val === 16) {
-                element.className = 'cell n16';
-            } else {
-                element.className = 'cell n-high';
-                element.style.backgroundColor = 'hsl(' + (val % 360) + ', 70%, 50%)';
+                const square = document.createElement('div');
+                square.classList.add('cell');
+                square.innerHTML = '';
+                gridDisplay.appendChild(square);
+                squares.push(square);
             }
         }
 
-        function getNewTileValue() {
-            let val; let attempts = 0;
-            while (attempts < 50) {
-                val = Math.floor(Math.random() * 5) + 1;
-                if (level >= 10 && val === 9) { attempts++; continue; }
-                if (level >= 9 && val === 8) { attempts++; continue; }
-                if (level >= 8 && val === 7) { attempts++; continue; }
-                if (level >= 7 && val === 6) { attempts++; continue; }
-                if (level >= 6 && val === 5) { attempts++; continue; }
-                if (level >= 5 && val === 4) { attempts++; continue; }
-                if (level >= 4 && val === 3) { attempts++; continue; }
-                if (level >= 3 && val === 2) { attempts++; continue; }
-                if (level >= 2 && val === 1) { attempts++; continue; }
-                return val;
-            }
-            return level + 1;
+        function generate() {
+            if (isGameOver) return;
+            const emptySquares = squares.filter(sq => sq.innerHTML === '');
+            if (emptySquares.length === 0) return;
+            const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+            let randomNum = Math.random() < 0.8 ? 1 : 2;
+            randomSquare.innerHTML = randomNum;
+            randomSquare.className = `cell n${randomNum}`;
         }
 
-        function refillGrid() {
-            let emptySpaces = false;
-            for (let i = 0; i < squares.length; i++) {
-                if (squares[i].innerHTML === '' || squares[i].innerHTML === '0') {
-                    let randomVal = getNewTileValue(); squares[i].innerHTML = randomVal; applyTileColor(squares[i], randomVal); emptySpaces = true;
-                }
-            }
-            updateStyles(); 
-            checkForPossibleMoves();
-            return emptySpaces;
-        }
-
-        function checkForPossibleMoves() {
-            for (let i = 0; i < squares.length; i++) {
-                let val = squares[i].innerHTML;
-                if (!val || val === '0') continue;
-
-                let row = Math.floor(i / size);
-                let col = i % size;
-
-                for (let dr = -1; dr <= 1; dr++) {
-                    for (let dc = -1; dc <= 1; dc++) {
-                        if (dr === 0 && dc === 0) continue;
-                        let nr = row + dr, nc = col + dc;
-                        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
-                            let neighborIdx = nr * size + nc;
-                            if (squares[neighborIdx].innerHTML === val) return true;
-                        }
-                    }
-                }
-            }
-            triggerGameOver("nomoves");
-            return false;
-        }
-
-        function startTimerSystem() { clearInterval(timerId); if (gameMode === 'normal') return; timerId = setInterval(() => { if (!isGameOver) { timeLeft--; timerDisplay.innerHTML = timeLeft; if (timeLeft <= 0) triggerGameOver("timeout"); } }, 1000); }
-        function resetTimerForCurrentLevel() { if (gameMode === 'normal') return; if (level === 1) timeLeft = 60; else if (level === 2) timeLeft = 55; else if (level === 3) timeLeft = 50; else if (level === 4) timeLeft = 45; else if (level === 5) timeLeft = 40; else timeLeft = 30; timerDisplay.innerHTML = timeLeft; }
-
-        function removeBlockedTilesFromBoard() {
-            for (let i = 0; i < squares.length; i++) {
-                let currentVal = parseInt(squares[i].innerHTML); let isBlocked = false;
-                if (level >= 2 && currentVal === 1) isBlocked = true;
-                if (isBlocked) { 
-                    let newVal = getNewTileValue(); 
-                    squares[i].innerHTML = newVal; 
-                    applyTileColor(squares[i], newVal);
-                }
-            }
-            updateStyles();
-        }
-
-        function showLevelUpPopup() {
-            popupLevelVal.innerHTML = level; playLevelUpSound();
-            levelBox.classList.add('level-scroll-anim'); setTimeout(() => levelBox.classList.remove('level-scroll-anim'), 1000);
-            levelUpPopup.style.display = 'block'; setTimeout(() => levelUpPopup.classList.add('active'), 10);
-            setTimeout(() => { levelUpPopup.classList.remove('active'); setTimeout(() => levelUpPopup.style.display = 'none', 500); }, 1500);
-        }
-
-        function checkLevelUp() {
-            if (score >= nextLevelScore) {
-                level++;
-                let previousTarget = nextLevelScore;
-                nextLevelScore = Math.floor((previousTarget * 1.4) + (level * 10));
-                updateLevelUI();
-                resetTimerForCurrentLevel(); 
-                showLevelUpPopup(); 
-                removeBlockedTilesFromBoard(); 
-                checkLevelUp();
-            }
-        }
-
-        function updateLevelUI() {
-            levelDisplay.innerHTML = level;
-            targetDisplay.innerHTML = nextLevelScore;
-            scoreDisplay.innerHTML = score;
-        }
-
-        function triggerGameOver(reason) { 
-            isGameOver = true; 
-            clearInterval(timerId); 
-            checkAndSaveHighScore(); 
-
-            if (reason === "timeout") {
-                gameOverMsg.innerHTML = "Aapka samay samapt ho gaya!";
-            } else if (reason === "nomoves") {
-                gameOverMsg.innerHTML = "Koi bhi box same nahi hai! Game Over.";
-            } else if (reason === "quit") {
-                gameOverMsg.innerHTML = "Aapne game Quit kiya. Score save ho gaya hai.";
-            }
+        function resetGame() {
+            clearInterval(timerId);
+            score = 0;
+            level = 1;
+            nextLevelScore = 100;
+            timeLeft = 60;
+            isGameOver = false;
+            scoreDisplay.innerText = score;
+            levelDisplay.innerText = level;
+            targetDisplay.innerText = nextLevelScore;
+            timerDisplay.innerText = timeLeft;
+            gameOverOverlay.style.display = 'none';
+            
+            createBoard();
+            generate();
+            generate();
 
             if (gameMode === 'pro') {
-                document.getElementById('restart-btn').style.display = 'none';
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerId);
+            timerId = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    timerDisplay.innerText = timeLeft;
+                } else {
+                    clearInterval(timerId);
+                    triggerGameOver("time");
+                }
+            }, 1000);
+        }
+
+        function triggerGameOver(reason) {
+            isGameOver = true;
+            clearInterval(timerId);
+            if (reason === "time") {
+                gameOverMsg.innerText = "Aapka samay samapt ho gaya!";
             } else {
-                document.getElementById('restart-btn').style.display = 'block';
+                gameOverMsg.innerText = "Game Over! No more moves available.";
             }
-
-            gameOverOverlay.style.display = 'flex'; 
+            gameOverOverlay.style.display = 'flex';
+            checkAndSaveHighScore();
         }
 
-        function updateStyles() { 
-            for (let i = 0; i < squares.length; i++) { 
-                let val = squares[i].innerHTML;
-                if (val !== '' && val !== '0') {
-                    applyTileColor(squares[i], parseInt(val));
-                }
-            } 
-        }
+        // Basic Swipe / Touch Handlers Setup
+        let touchStartX = 0;
+        let touchStartY = 0;
 
-        function triggerPopEffect(element) { const existing = document.querySelector('.pop-effect'); if (existing) existing.classList.remove('pop-effect'); element.classList.add('pop-effect'); }
+        gridDisplay.addEventListener('touchstart', (e) => {
+            if (isGameOver) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
 
-        let selectedPath = []; let isSwiping = false; let currentValue = null;
-        
-        function getCellIndexFromPoint(x, y) { 
-            const rect = gridDisplay.getBoundingClientRect(); 
-            const cellW = rect.width / size; const cellH = rect.height / size;
-            const col = Math.floor((x - rect.left) / cellW); const row = Math.floor((y - rect.top) / cellH); 
-            if (col >= 0 && col < size && row >= 0 && row < size) return row * size + col; 
-            return null; 
-        }
-        
-        function handleSwipeMove(clientX, clientY) {
-            if (!isSwiping || isGameOver) return;
-            const idx = getCellIndexFromPoint(clientX, clientY);
-            if (idx !== null) {
-                const val = squares[idx].innerHTML;
-                if (val !== '' && val !== '0') {
-                    if (selectedPath.length === 0) { currentValue = val; selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
-                    else if (selectedPath.length >= 2 && idx === selectedPath[selectedPath.length - 2]) { let rem = selectedPath.pop(); squares[rem].classList.remove('selected-cell'); }
-                    else if (val === currentValue && !selectedPath.includes(idx)) {
-                        const last = selectedPath[selectedPath.length - 1];
-                        const r1 = Math.floor(last/size), c1 = last%size, r2 = Math.floor(idx/size), c2 = idx%size;
-                        if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) { selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
-                    }
-                    updateSwipeLine();
-                }
+        gridDisplay.addEventListener('touchend', (e) => {
+            if (isGameOver) return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let touchEndY = e.changedTouches[0].clientY;
+            
+            let diffX = touchEndX - touchStartX;
+            let diffY = touchEndY - touchStartY;
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX > 30) moveRight();
+                else if (diffX < -30) moveLeft();
+            } else {
+                if (diffY > 30) moveDown();
+                else if (diffY < -30) moveUp();
             }
-        }
+        }, {passive: true});
 
-        function updateSwipeLine() {
-            if (selectedPath.length < 1) { drawingLine.style.opacity = '0'; return; }
-            drawingLine.style.opacity = '1';
-            const rect = gridDisplay.getBoundingClientRect();
-            let d = '';
-            selectedPath.forEach((idx, i) => {
-                const cRect = squares[idx].getBoundingClientRect();
-                const cx = (cRect.left - rect.left) + (cRect.width / 2);
-                const cy = (cRect.top - rect.top) + (cRect.height / 2);
-                if (i === 0) d += `M ${cx} ${cy}`; else d += ` L ${cx} ${cy}`;
-            });
-            drawingLine.setAttribute('d', d);
-        }
-
-        function endSwipe() {
-            if (!isSwiping || isGameOver) return; 
-            isSwiping = false; 
-            drawingLine.style.opacity = '0';
-            selectedPath.forEach(idx => squares[idx].classList.remove('selected-cell'));
-            if (selectedPath.length >= 2) {
-                let total = 0; let lastIdx = selectedPath[selectedPath.length - 1];
-                selectedPath.forEach(idx => { total += parseInt(squares[idx].innerHTML); squares[idx].innerHTML = ''; });
-                squares[lastIdx].innerHTML = total; applyTileColor(squares[lastIdx], total); score += total; 
-                checkLevelUp(); updateLevelUI(); triggerPopEffect(squares[lastIdx]); playJoinSoundLoud(); resetTimerForCurrentLevel();
-                setTimeout(refillGrid, 100);
-            }
-            selectedPath = []; currentValue = null; updateStyles();
-        }
-
-        gridDisplay.addEventListener('touchstart', (e) => { isSwiping = true; handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
-        gridDisplay.addEventListener('touchmove', (e) => { handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
-        gridDisplay.addEventListener('touchend', endSwipe);
-        gridDisplay.addEventListener('mousedown', (e) => { isSwiping = true; handleSwipeMove(e.clientX, e.clientY); });
-        window.addEventListener('mousemove', (e) => { if(isSwiping) handleSwipeMove(e.clientX, e.clientY); });
-        window.addEventListener('mouseup', endSwipe);
-
-        function resetGame() { 
-            score = 0; level = 1; nextLevelScore = 100;
-            timeLeft = 60; isGameOver = false; 
-            updateLevelUI(); timerDisplay.innerHTML = 60; 
-            gameOverOverlay.style.display = 'none'; 
-            levelUpPopup.style.display = 'none'; 
-            document.getElementById('restart-btn').style.display = 'block';
-            createBoard(); 
-            startTimerSystem(); 
-        }
-        
-        window.addEventListener('load', () => {
-            const saved = localStorage.getItem('currentUserMobile');
-            if (saved) { 
-                database.ref('users/' + saved).once('value').then((snap) => { 
-                    if (snap.exists()) { 
-                        currentUserMobile = saved; 
-                        updateLastLogin(saved);
-                        document.getElementById('auth-overlay').style.display = 'none'; 
-                        document.getElementById('mode-overlay').style.display = 'flex'; 
-                        fetchUserData();
-                        fetchGlobalScores(); 
-                    } 
-                }); 
-            }
+        document.addEventListener('keydown', (e) => {
+            if (isGameOver) return;
+            if (e.key === 'ArrowLeft') moveLeft();
+            else if (e.key === 'ArrowRight') moveRight();
+            else if (e.key === 'ArrowUp') moveUp();
+            else if (e.key === 'ArrowDown') moveDown();
         });
 
-        createBoard();
+        // Simplified Movement & Merging Logic for Grid Columns/Rows
+        function handleSwipeMovement(rowOrCol) {
+            let filtered = rowOrCol.filter(val => val);
+            let missing = size - filtered.length;
+            let zeros = Array(missing).fill('');
+            let newRow = filtered.concat(zeros);
+            return newRow;
+        }
+
+        function moveLeft() {
+            let changeMade = false;
+            for (let i = 0; i < size; i++) {
+                let row = [];
+                for (let j = 0; j < size; j++) {
+                    row.push(squares[i * size + j].innerHTML);
+                }
+                
+                let processed = processRow(row);
+                for (let j = 0; j < size; j++) {
+                    if (squares[i * size + j].innerHTML !== processed[j]) changeMade = true;
+                    squares[i * size + j].innerHTML = processed[j];
+                    updateCellStyling(squares[i * size + j]);
+                }
+            }
+            if (changeMade) postMoveActions();
+        }
+
+        function moveRight() {
+            let changeMade = false;
+            for (let i = 0; i < size; i++) {
+                let row = [];
+                for (let j = 0; j < size; j++) {
+                    row.push(squares[i * size + j].innerHTML);
+                }
+                
+                let processed = processRow(row.reverse()).reverse();
+                for (let j = 0; j < size; j++) {
+                    if (squares[i * size + j].innerHTML !== processed[j]) changeMade = true;
+                    squares[i * size + j].innerHTML = processed[j];
+                    updateCellStyling(squares[i * size + j]);
+                }
+            }
+            if (changeMade) postMoveActions();
+        }
+
+        function moveUp() {
+            let changeMade = false;
+            for (let j = 0; j < size; j++) {
+                let col = [];
+                for (let i = 0; i < size; i++) {
+                    col.push(squares[i * size + j].innerHTML);
+                }
+                
+                let processed = processRow(col);
+                for (let i = 0; i < size; i++) {
+                    if (squares[i * size + j].innerHTML !== processed[i]) changeMade = true;
+                    squares[i * size + j].innerHTML = processed[i];
+                    updateCellStyling(squares[i * size + j]);
+                }
+            }
+            if (changeMade) postMoveActions();
+        }
+
+        function moveDown() {
+            let changeMade = false;
+            for (let j = 0; j < size; j++) {
+                let col = [];
+                for (let i = 0; i < size; i++) {
+                    col.push(squares[i * size + j].innerHTML);
+                }
+                
+                let processed = processRow(col.reverse()).reverse();
+                for (let i = 0; i < size; i++) {
+                    if (squares[i * size + j].innerHTML !== processed[i]) changeMade = true;
+                    squares[i * size + j].innerHTML = processed[i];
+                    updateCellStyling(squares[i * size + j]);
+                }
+            }
+            if (changeMade) postMoveActions();
+        }
+
+        function processRow(row) {
+            let filtered = row.filter(val => val !== '');
+            for (let i = 0; i < filtered.length - 1; i++) {
+                if (filtered[i] === filtered[i + 1]) {
+                    let mergedVal = parseInt(filtered[i]) * 2;
+                    filtered[i] = mergedVal;
+                    score += mergedVal;
+                    filtered.splice(i + 1, 1);
+                }
+            }
+            while (filtered.length < size) {
+                filtered.push('');
+            }
+            return filtered;
+        }
+
+        function updateCellStyling(cell) {
+            const val = cell.innerHTML;
+            cell.className = 'cell';
+            if (val !== '') {
+                cell.classList.add(`n${Math.min(parseInt(val), 16)}`);
+                if(parseInt(val) > 16) cell.classList.add('n-high');
+            }
+        }
+
+        function postMoveActions() {
+            scoreDisplay.innerText = score;
+            checkLevelProgress();
+            generate();
+            
+            // Check if game is over (no empty spaces and no adjacent matches)
+            const emptySquares = squares.filter(sq => sq.innerHTML === '');
+            if (emptySquares.length === 0) {
+                let possible = false;
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        let currentVal = squares[i * size + j].innerHTML;
+                        if (j < size - 1 && currentVal === squares[i * size + (j + 1)].innerHTML) possible = true;
+                        if (i < size - 1 && currentVal === squares[(i + 1) * size + j].innerHTML) possible = true;
+                    }
+                }
+                if (!possible) {
+                    triggerGameOver("nomoves");
+                }
+            }
+        }
+
+        function checkLevelProgress() {
+            if (score >= nextLevelScore) {
+                level++;
+                nextLevelScore += level * 100;
+                levelDisplay.innerText = level;
+                targetDisplay.innerText = nextLevelScore;
+                
+                // Trigger Level Up Popup Animation
+                popupLevelVal.innerText = level;
+                levelUpPopup.style.display = 'block';
+                levelUpPopup.classList.add('active');
+                levelBox.classList.add('level-scroll-anim');
+
+                setTimeout(() => {
+                    levelUpPopup.classList.remove('active');
+                    levelUpPopup.style.display = 'none';
+                    levelBox.classList.remove('level-scroll-anim');
+                }, 1500);
+
+                if(gameMode === 'pro') {
+                    timeLeft += 30; // Bonus time on level up
+                }
+            }
+        }
+
+        // Auto-login check on page load
+        window.onload = function() {
+            const savedMobile = localStorage.getItem('currentUserMobile');
+            if (savedMobile) {
+                database.ref('users/' + savedMobile).once('value').then(snap => {
+                    if (snap.exists()) {
+                        currentUserMobile = savedMobile;
+                        updateLastLogin(savedMobile);
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        document.getElementById('mode-overlay').style.display = 'flex';
+                        fetchUserData();
+                        fetchGlobalScores();
+                    }
+                });
+            }
+        };
     </script>
 </body>
 </html>
