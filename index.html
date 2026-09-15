@@ -116,7 +116,6 @@
             100% { transform: scale(1); }
         }
         
-        /* 3D effect removed from animation for performance optimization */
         @keyframes glowAndPop {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -142,11 +141,8 @@
         .n9 { background-color: #6c5ce7; }
         .n10 { background-color: #00cec9; }
 
-        /* Naye bante hue numbers ke color code styles */
         .n12 { background-color: #fd79a8; }
         .n16 { background-color: #e17055; }
-        
-        /* DYNAMIC COLOR: 10000+ ke liye fallback */
         .n-high { background-color: #57606f; }
 
         .controls {
@@ -166,12 +162,11 @@
         }
         .instructions {
             margin-top: 5px;
-            color: #333; /* Darker for animated BG visibility */
+            color: #333;
             font-size: 12px;
             font-weight: bold;
         }
 
-        /* NAYA CODE: SVG overlay board ke upar free-form line kheechnay ke liye */
         #swipe-canvas {
             position: absolute;
             top: 0;
@@ -191,18 +186,16 @@
             opacity: 0;
             transition: opacity 0.05s;
         }
-        /* Touch hone par highlight effect */
         .selected-cell {
             box-shadow: inset 0 0 10px rgba(255,255,255,0.8);
             transform: scale(0.95);
         }
 
-        /* NAYA CODE: Naye counters aur Game Over overlay ke liye CSS */
         .header-stats {
             display: flex;
             gap: 5px;
             justify-content: center;
-            flex-wrap: wrap; /* Takki niche shift ho sakein mobile pe */
+            flex-wrap: wrap;
             padding: 0 5px;
         }
         .stat-box {
@@ -217,7 +210,6 @@
             min-width: 60px;
         }
         
-        /* FIX CODE: Game over show hone ke liye isko global full overlay banaya gaya hai */
         #game-over-overlay {
             display: none;
             position: fixed;
@@ -234,15 +226,14 @@
         }
         #game-over-overlay h2 {
             color: #e74c3c;
-            font-size: 10vw; /* px to vw */
+            font-size: 10vw;
             margin-bottom: 3%;
         }
         #game-over-overlay p {
-            font-size: 5vw; /* px to vw */
+            font-size: 5vw;
             margin-bottom: 5%;
         }
 
-        /* NAYA CODE: Level Up 3D animation design */
         #level-up-popup {
             display: none;
             position: absolute;
@@ -251,7 +242,7 @@
             transform: translate(-50%, -50%) scale(0.5);
             background: linear-gradient(135deg, #FFD700, #FFA500);
             color: #fff;
-            padding: 5% 10%; /* px to % */
+            padding: 5% 10%;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px #FFD700;
             text-align: center;
@@ -260,7 +251,7 @@
             pointer-events: none;
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
             opacity: 0;
-            width: 70%; /* Naya responsive width */
+            width: 70%;
         }
         #level-up-popup.active {
             transform: translate(-50%, -50%) scale(1.1);
@@ -268,15 +259,14 @@
         }
         #level-up-popup h2 {
             margin: 0;
-            font-size: 8vw; /* px to vw */
+            font-size: 8vw;
             text-shadow: 2px 4px 5px rgba(0,0,0,0.3);
         }
         #level-up-popup p {
             margin: 1% 0 0 0;
-            font-size: 5vw; /* px to vw */
+            font-size: 5vw;
         }
 
-        /* NAYA CODE: Level box ke 1 second scroll animation ke liye */
         @keyframes levelScroll {
             0% { transform: translateY(0); }
             25% { transform: translateY(-15px); }
@@ -288,7 +278,6 @@
             animation: levelScroll 1s ease-in-out;
         }
 
-        /* NAYA CODE: Sound on/off button ke liye CSS */
         .sound-btn {
             background-color: #9b59b6;
             padding: 4px 8px;
@@ -304,7 +293,6 @@
             border: none;
         }
 
-        /* Back Button CSS */
         .back-btn {
             background-color: #7f8c8d;
             padding: 4px 8px;
@@ -319,10 +307,6 @@
             align-items: center;
             justify-content: center;
         }
-
-        /* --------------------------- */
-        /* NAYA CODE: AUTH & MENU UI (Image Based Modification) */
-        /* --------------------------- */
         
         @keyframes gradientShift {
             0% { background-position: 0% 50%; }
@@ -347,12 +331,12 @@
         }
         
         .game-title-box {
-            margin-bottom: 5%; /* px to % */
+            margin-bottom: 5%;
             text-align: center;
         }
         .game-title-box h1 {
             color: #ffcc00;
-            font-size: 10vw; /* px to vw */
+            font-size: 10vw;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 2px;
@@ -368,15 +352,15 @@
 
         .auth-card {
             background: #0f1c24;
-            padding: 5% 8%; /* FIX: Padding kam ki screen fit ke liye */
+            padding: 5% 8%;
             border-radius: 5px;
             border: 3px solid #b38f00;
             box-shadow: 0 0 25px rgba(255, 204, 0, 0.3), inset 0 0 15px rgba(0,0,0,0.8);
-            width: 85%; /* px to % */
+            width: 85%;
             max-width: 320px;
             text-align: center;
             position: relative;
-            box-sizing: border-box; /* Zaroori hai width manage karne ke liye */
+            box-sizing: border-box;
         }
         
         .auth-card::before {
@@ -389,14 +373,14 @@
         }
         
         .input-group {
-            margin-bottom: 4%; /* px to % */
+            margin-bottom: 4%;
             text-align: left;
             position: relative;
         }
         
         .input-group input, .input-group select {
             width: 100%;
-            padding: 3%; /* px to % */
+            padding: 3%;
             background: #080f14;
             border: 1px solid #1a3344;
             border-radius: 3px;
@@ -410,10 +394,10 @@
             width: 100%;
             background: linear-gradient(to bottom, #ffdb4d, #b38f00);
             color: #000;
-            padding: 4%; /* px to % */
+            padding: 4%;
             border-radius: 3px;
             font-size: 18px;
-            margin-top: 5%; /* px to % */
+            margin-top: 5%;
             border: 1px solid #ffe680;
             cursor: pointer;
             font-weight: bold;
@@ -421,7 +405,6 @@
             box-shadow: 0 4px 0px #665200, 0 5px 10px rgba(0,0,0,0.5);
         }
 
-        /* Mode Selection Styles */
         #mode-overlay {
             position: fixed;
             top: 0;
@@ -439,10 +422,10 @@
         }
         .mode-btn {
             display: block;
-            width: 70%; /* px to % */
+            width: 70%;
             max-width: 260px;
-            padding: 5%; /* px to % */
-            margin: 4% auto; /* px to % */
+            padding: 5%;
+            margin: 4% auto;
             border-radius: 10px;
             font-size: 22px;
             font-weight: bold;
@@ -452,31 +435,27 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
 
-        /* High Score Boxes */
         .highscore-row {
             display: flex;
             justify-content: center;
-            gap: 3%; /* px to % */
-            margin-bottom: 4%; /* px to % */
+            gap: 3%;
+            margin-bottom: 4%;
         }
         .hs-box {
             background: #ffffff;
-            width: 28%; /* px to % */
-            padding: 3% 1%; /* px to % */
+            width: 28%;
+            padding: 3% 1%;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             border: 2px solid #ddd;
             text-align: center;
         }
 
-        /* --------------------------- */
-        /* NAYA CODE: SIDEBARS & MODALS */
-        /* --------------------------- */
         .left-sidebar {
             position: fixed;
             top: 0;
             left: -280px;
-            width: 70%; /* px to % responsive */
+            width: 70%;
             max-width: 250px;
             height: 100%;
             background: #0f1c24;
@@ -486,7 +465,7 @@
             box-shadow: 5px 0 15px rgba(0,0,0,0.7);
             display: flex;
             flex-direction: column;
-            padding: 5% 4%; /* px to % */
+            padding: 5% 4%;
             box-sizing: border-box;
         }
         .left-sidebar.active {
@@ -496,8 +475,8 @@
             background: #080f14;
             color: #ffcc00;
             border: 1px solid #1a3344;
-            padding: 5%; /* px to % */
-            margin-bottom: 3%; /* px to % */
+            padding: 5%;
+            margin-bottom: 3%;
             border-radius: 3px;
             cursor: pointer;
             text-align: left;
@@ -512,7 +491,7 @@
             background: #0f1c24;
             color: #ffcc00;
             border: 2px solid #b38f00;
-            padding: 2% 4%; /* px to % */
+            padding: 2% 4%;
             border-radius: 5px;
             font-weight: bold;
             cursor: pointer;
@@ -522,9 +501,9 @@
 
         .modal-card {
             background: #0f1c24;
-            width: 85%; /* px to % */
+            width: 85%;
             max-width: 320px;
-            padding: 6%; /* px to % */
+            padding: 6%;
             border-radius: 5px;
             border: 3px solid #b38f00;
             box-shadow: 0 0 25px rgba(255, 204, 0, 0.3);
@@ -532,20 +511,19 @@
             position: relative;
         }
 
-        /* FIX: Dashboard Text Color to White */
         .dashboard-row {
             display: flex;
             justify-content: space-between;
             background: #080f14;
-            padding: 3%; /* px to % */
+            padding: 3%;
             border-radius: 4px;
             border: 1px solid #1a3344;
-            margin-bottom: 2%; /* px to % */
-            color: #ffffff; /* Font color white */
+            margin-bottom: 2%;
+            color: #ffffff;
         }
         
         .hs-profile-pic {
-            width: 10vw; /* px to vw */
+            width: 10vw;
             height: 10vw;
             max-width: 35px;
             max-height: 35px;
@@ -558,7 +536,7 @@
         
         .profile-pic-container {
             position: relative;
-            width: 25vw; /* px to vw */
+            width: 25vw;
             height: 25vw;
             max-width: 100px;
             max-height: 100px;
@@ -569,7 +547,6 @@
             background: #080f14;
         }
         
-        /* Rest of existing classes maintain their relative properties */
         .side-menu {
             position: fixed;
             top: 0;
@@ -693,9 +670,6 @@
         .hs-first .score-text { color: #d4af37; }
         .hs-first .rank-text { color: #d4af37; }
 
-        /* --------------------------- */
-        /* NEW ROOM UI STYLES */
-        /* --------------------------- */
         #room-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -737,7 +711,6 @@
             font-size: 13px;
         }
 
-        /* NAYA CODE: Rank Modal Styles */
         #rank-modal .rank-entry {
             display: flex;
             justify-content: space-between;
@@ -752,7 +725,6 @@
             margin-bottom: 5px;
         }
 
-        /* NAYA CODE: Room History Modal Styles */
         #room-history-modal .history-entry {
             background: #0f1c24;
             border: 1px solid #1a3344;
@@ -793,17 +765,7 @@
         .add-coins-top-btn:active {
             transform: scale(0.95);
         }
-        .deposit-history-item {
-            background: #080f14;
-            border: 1px solid #1a3344;
-            padding: 8px;
-            margin-bottom: 6px;
-            border-radius: 4px;
-            font-size: 12px;
-            text-align: left;
-        }
-        
-        /* Coin Selection Grid Styles */
+
         .coin-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -850,7 +812,6 @@
             <span class="modal-close-btn" onclick="closeModal('add-coins-modal')">&times;</span>
             <h2 style="color: #ffcc00; margin-top:0;">Add Coins</h2>
             
-            <!-- Step 1: Select Coin Package -->
             <div id="coin-selection-step">
                 <p style="font-size: 13px; color: #ccc; margin-bottom: 10px;">Select Coin Package:</p>
                 <div class="coin-grid">
@@ -862,7 +823,6 @@
                 </div>
             </div>
 
-            <!-- Step 2: Payment & QR Section (Hidden initially) -->
             <div id="payment-step" style="display: none;">
                 <p style="font-size: 13px; color: #2ecc71; margin: 0 0 5px 0;">Selected Package: <b id="selected-coin-text">0</b> Coins</p>
                 <div style="background: #fff; padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 10px;">
@@ -887,23 +847,11 @@
         </div>
     </div>
 
-    <!-- DEPOSIT HISTORY MODAL -->
-    <div class="modal-overlay" id="deposit-history-modal">
-        <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('deposit-history-modal')">&times;</span>
-            <h2 style="color: #ffcc00;">Deposit History</h2>
-            <div id="deposit-history-list" class="text-modal-content">
-                Loading history...
-            </div>
-        </div>
-    </div>
-
     <div class="modal-overlay" id="history-modal">
         <div class="modal-card">
             <span class="modal-close-btn" onclick="closeModal('history-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Win History</h2>
-            <div id="win-history-list" class="text-modal-content">
-                </div>
+            <div id="win-history-list" class="text-modal-content"></div>
         </div>
     </div>
 
@@ -925,8 +873,7 @@
         <div class="modal-card">
             <span class="modal-close-btn" onclick="closeModal('room-history-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Room History</h2>
-            <div id="room-history-list" class="text-modal-content">
-                </div>
+            <div id="room-history-list" class="text-modal-content"></div>
         </div>
     </div>
 
@@ -1100,13 +1047,13 @@
     <div id="mode-overlay">
         <button id="menu-trigger-btn" onclick="toggleLeftSidebar(true)">☰ Menu</button>
         
-        <div class="mode-container" style="text-align: center; width: 100%;">
-            <!-- TOP CENTER ADD COINS BUTTON -->
-            <button class="add-coins-top-btn" onclick="openAddCoinsModal()">➕ Add Coins</button>
-
+        <div class="mode-container" style="text-align: center;">
             <h2 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Select Game Mode</h2>
             <button class="mode-btn normal-btn" style="background: #2ecc71;" onclick="startGameMode('normal')">Normal Play</button>
             <button class="mode-btn pro-btn" style="background: #e67e22;" onclick="openRoomDashboard()">Pro Play (Coins)</button>
+
+            <!-- TOP CENTER ADD COINS BUTTON -->
+            <button class="add-coins-top-btn" onclick="openAddCoinsModal()">➕ Add Coins</button>
 
             <div class="highscore-title">🏆 Normal Mode Top Scores 🏆</div>
             <div class="highscore-row">
@@ -1161,8 +1108,7 @@
             <button onclick="openRoomHistoryModal()" style="background: #3498db; color: white; border: none; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer;">History</button>
         </div>
         
-        <div id="active-rooms-list" style="margin-top: 10px;">
-            </div>
+        <div id="active-rooms-list" style="margin-top: 10px;"></div>
 
         <button onclick="document.getElementById('room-overlay').style.display='none'" style="margin-top: 20px; padding: 10px; background: #555; color: white; border: none; border-radius: 5px; width: 100%;">Close Dashboard</button>
     </div>
@@ -1175,9 +1121,6 @@
     </div>
 
     <div class="header">
-        <!-- TOP CENTER ADD COINS BUTTON IN GAME PLAY -->
-        <button class="add-coins-top-btn" onclick="openAddCoinsModal()" style="margin: 0 auto 5px auto; padding: 5px 12px; font-size: 12px;">➕ Add Coins</button>
-        
         <h1>Merge Math Numbers</h1>
         
         <div class="top-stats-row">
@@ -1236,15 +1179,15 @@
         let isSoundOn = true;
         let audioCtx = null;
 
-        // Firebase Config
+        /* UPDATED FIREBASE CONFIGURATION */
         const firebaseConfig = {
             apiKey: "AIzaSyA5LxqMPqhnCQ4pD71AfNzulLSVacf1G7g",
-            authDomain: "math-merge-fa42c.firebaseapp.com",
-            projectId: "math-merge-fa42c",
-            storageBucket: "math-merge-fa42c.firebasestorage.app",
-            messagingSenderId: "196288075601",
-            appId: "1:196288075601:web:4b53edcaf71ae171986570",
-            measurementId: "G-H9N3PZ0HCE",
+            authDomain: "mathmarge.firebaseapp.com",
+            projectId: "mathmarge",
+            storageBucket: "mathmarge.firebasestorage.app",
+            messagingSenderId: "313180377672",
+            appId: "1:313180377672:web:930c0b0ec175033153fe7d",
+            measurementId: "G-VN9F03PJ1T",
             databaseURL: "https://math-merge-fa42c-default-rtdb.firebaseio.com/" 
         };
         
@@ -1254,8 +1197,7 @@
         let gameMode = 'normal'; 
         let currentUserMobile = null;
         let userCoins = 0;
-        let activeRoomId = null; // Track current room being played
-        let selectedCoinPackage = 0;
+        let activeRoomId = null;
 
         let normalHighScores = [
             {score: 0, name: "-", mobile: "****"},
@@ -1263,24 +1205,21 @@
             {score: 0, name: "-", mobile: "****"}
         ];
 
-        // ---------------------------------------------------
-        // ADD COINS & PAYMENT LOGIC (UPDATED WITH MULTICLICK GUARD)
-        // ---------------------------------------------------
+        let selectedCoinPackage = 0;
+
         function openAddCoinsModal() {
             if(!currentUserMobile) { alert("Please login first!"); return; }
             document.getElementById('add-coins-modal').style.display = 'flex';
-            resetCoinSelection(); // Show step 1 first
+            resetCoinSelection();
         }
 
         function selectCoinPackage(amount) {
             selectedCoinPackage = amount;
             document.getElementById('selected-coin-text').innerText = amount;
             
-            // Hide selection step, show payment step
             document.getElementById('coin-selection-step').style.display = 'none';
             document.getElementById('payment-step').style.display = 'block';
 
-            // Fetch dynamic QR code from admin setting in Firebase
             database.ref('system/payment_qr').on('value', snap => {
                 if(snap.exists()) {
                     const qrUrl = snap.val();
@@ -1311,7 +1250,6 @@
             if(!txId) { alert("Kripya Transaction ID dalein!"); return; }
             if(!fileInput.files || !fileInput.files[0]) { alert("Kripya payment ka screenshot upload karein!"); return; }
 
-            // Double click / Multiple submission protection
             submitBtn.disabled = true;
             submitBtn.innerText = "Submitting Please Wait...";
 
@@ -1346,42 +1284,15 @@
         }
 
         function openDepositHistory() {
-            if(!currentUserMobile) return;
-            const historyList = document.getElementById('deposit-history-list');
-            historyList.innerHTML = 'Loading deposit history...';
-            document.getElementById('deposit-history-modal').style.display = 'flex';
-
-            database.ref('deposits').orderByChild('mobile').equalTo(currentUserMobile).once('value').then(snap => {
-                const data = snap.val();
-                historyList.innerHTML = '';
-                if(!data) { historyList.innerHTML = '<p>Koi deposit history nahi mili.</p>'; return; }
-
-                Object.values(data).reverse().forEach(item => {
-                    const statusColor = item.status === 'Successful' ? '#2ecc71' : '#f1c40f';
-                    const div = document.createElement('div');
-                    div.className = 'deposit-history-item';
-                    div.innerHTML = `
-                        <div><b>Coins:</b> ${item.coinsRequested || 'N/A'} | <b>TxID:</b> ${item.txId}</div>
-                        <div><b>Status:</b> <span style="color:${statusColor}; font-weight:bold;">${item.status}</span></div>
-                    `;
-                    historyList.appendChild(div);
-                });
-            });
+            alert("Deposit history feature coming soon!");
         }
 
-        // ---------------------------------------------------
-        // REALTIME LAST LOGIN UPDATE FUNCTION
-        // ---------------------------------------------------
         function updateLastLogin(mobile) {
             if(!mobile) return;
             database.ref('users/' + mobile).update({
                 lastLogin: firebase.database.ServerValue.TIMESTAMP
             });
         }
-
-        // ---------------------------------------------------
-        // WALLET & ROOM LOGIC (NEW FUNCTIONS)
-        // ---------------------------------------------------
 
         function openRoomDashboard() {
             document.getElementById('room-overlay').style.display = 'flex';
@@ -1633,10 +1544,6 @@
             });
         }
 
-        // ---------------------------------------------------
-        // EXISTING GAME FUNCTIONS & LOGIC
-        // ---------------------------------------------------
-
         function togglePassVisibility(id) {
             const input = document.getElementById(id);
             if (input.type === "password") input.type = "text";
@@ -1670,7 +1577,7 @@
                             if(refSnap.exists()) {
                                 initialCoins = 20;
                                 database.ref('users/' + refer + '/coins').transaction(c => (c || 0) + 10);
-                                finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! Valid refer code ki vajah se 20 Coins mile hain.");
+                                finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! Valid refer code ki wajah se 20 Coins mile hain.");
                             } else {
                                 finalizeSignup(name, mobile, pass, 10, "Refer code galat hai, par signup ho gaya! 10 Coins mile hain.");
                             }
@@ -1822,7 +1729,8 @@
         function openProfileModalFromSidebar() { toggleLeftSidebar(false); openProfileModal(); }
         
         function handleShareLink() { 
-            const link = "https://imran13144.github.io/Tic-Tac-Toe-Dawnload/"; 
+            /* UPDATED SHARE LINK TO GITHUB PAGES */
+            const link = "https://mathmarge.github.io/MathMarge/"; 
             const msg = `Hey! Join me on Merge Math Game. Mere saath khele aur coins jeetein. Mera Refer Code hai: ${currentUserMobile}. Game Link: ${link}`;
             
             if (navigator.share) {
@@ -1867,282 +1775,276 @@
         function initAudioContext() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function toggleSound() { isSoundOn = !isSoundOn; const btn = document.getElementById('sound-toggle'); btn.innerHTML = isSoundOn ? "🔊 Sound: ON" : "🔈 Sound: OFF"; btn.style.background = isSoundOn ? "#9b59b6" : "#95a5a6"; }
 
-        // Core Game Initialization & Board Setup
+        function playSwipeSoundLoud() {
+            if (!isSoundOn) return; initAudioContext();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+            osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+        }
+
+        function playJoinSoundLoud() {
+            if (!isSoundOn) return; initAudioContext();
+            const osc1 = audioCtx.createOscillator(); const osc2 = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc1.type = 'sine'; osc2.type = 'square'; osc1.frequency.setValueAtTime(500, audioCtx.currentTime); osc2.frequency.setValueAtTime(1000, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+            osc1.connect(gain); osc2.connect(gain); gain.connect(audioCtx.destination); osc1.start(); osc2.start(); osc1.stop(audioCtx.currentTime + 0.3); osc2.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playLevelUpSound() {
+            if (!isSoundOn) return; const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const playBeep = (freq, startTime, duration) => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(freq, startTime); gain.gain.setValueAtTime(0.1, startTime); gain.gain.exponentialRampToValueAtTime(0.01, startTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration); };
+            playBeep(400, audioCtx.currentTime, 0.15); playBeep(600, audioCtx.currentTime + 0.15, 0.15); playBeep(800, audioCtx.currentTime + 0.30, 0.3);
+        }
+
         function createBoard() {
-            gridDisplay.innerHTML = '';
-            gridDisplay.appendChild(swipeCanvas);
-            gridDisplay.appendChild(levelUpPopup);
+            const svgLayer = document.getElementById('swipe-canvas');
+            gridDisplay.innerHTML = ''; gridDisplay.appendChild(svgLayer);
             squares = [];
+            const fragment = document.createDocumentFragment();
             for (let i = 0; i < size * size; i++) {
-                const square = document.createElement('div');
-                square.classList.add('cell');
-                square.innerHTML = '';
-                gridDisplay.appendChild(square);
-                squares.push(square);
+                let cell = document.createElement('div'); cell.classList.add('cell');
+                let randomVal = getNewTileValue(); cell.innerHTML = randomVal; applyTileColor(cell, randomVal);
+                fragment.appendChild(cell); squares.push(cell);
             }
+            gridDisplay.appendChild(fragment);
+            checkForPossibleMoves();
         }
 
-        function generate() {
-            if (isGameOver) return;
-            const emptySquares = squares.filter(sq => sq.innerHTML === '');
-            if (emptySquares.length === 0) return;
-            const randomSquare = emptySquares[Math.floor(Math.random() * emptySquares.length)];
-            let randomNum = Math.random() < 0.8 ? 1 : 2;
-            randomSquare.innerHTML = randomNum;
-            randomSquare.className = `cell n${randomNum}`;
-        }
-
-        function resetGame() {
-            clearInterval(timerId);
-            score = 0;
-            level = 1;
-            nextLevelScore = 100;
-            timeLeft = 60;
-            isGameOver = false;
-            scoreDisplay.innerText = score;
-            levelDisplay.innerText = level;
-            targetDisplay.innerText = nextLevelScore;
-            timerDisplay.innerText = timeLeft;
-            gameOverOverlay.style.display = 'none';
-            
-            createBoard();
-            generate();
-            generate();
-
-            if (gameMode === 'pro') {
-                startTimer();
-            }
-        }
-
-        function startTimer() {
-            clearInterval(timerId);
-            timerId = setInterval(() => {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    timerDisplay.innerText = timeLeft;
-                } else {
-                    clearInterval(timerId);
-                    triggerGameOver("time");
-                }
-            }, 1000);
-        }
-
-        function triggerGameOver(reason) {
-            isGameOver = true;
-            clearInterval(timerId);
-            if (reason === "time") {
-                gameOverMsg.innerText = "Aapka samay samapt ho gaya!";
+        function applyTileColor(element, val) {
+            element.classList.remove('n-high');
+            if (val <= 10) {
+                element.className = 'cell n' + val;
+            } else if (val === 12) {
+                element.className = 'cell n12';
+            } else if (val === 16) {
+                element.className = 'cell n16';
             } else {
-                gameOverMsg.innerText = "Game Over! No more moves available.";
-            }
-            gameOverOverlay.style.display = 'flex';
-            checkAndSaveHighScore();
-        }
-
-        // Basic Swipe / Touch Handlers Setup
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        gridDisplay.addEventListener('touchstart', (e) => {
-            if (isGameOver) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, {passive: true});
-
-        gridDisplay.addEventListener('touchend', (e) => {
-            if (isGameOver) return;
-            let touchEndX = e.changedTouches[0].clientX;
-            let touchEndY = e.changedTouches[0].clientY;
-            
-            let diffX = touchEndX - touchStartX;
-            let diffY = touchEndY - touchStartY;
-
-            if (Math.abs(diffX) > Math.abs(diffY)) {
-                if (diffX > 30) moveRight();
-                else if (diffX < -30) moveLeft();
-            } else {
-                if (diffY > 30) moveDown();
-                else if (diffY < -30) moveUp();
-            }
-        }, {passive: true});
-
-        document.addEventListener('keydown', (e) => {
-            if (isGameOver) return;
-            if (e.key === 'ArrowLeft') moveLeft();
-            else if (e.key === 'ArrowRight') moveRight();
-            else if (e.key === 'ArrowUp') moveUp();
-            else if (e.key === 'ArrowDown') moveDown();
-        });
-
-        // Simplified Movement & Merging Logic for Grid Columns/Rows
-        function handleSwipeMovement(rowOrCol) {
-            let filtered = rowOrCol.filter(val => val);
-            let missing = size - filtered.length;
-            let zeros = Array(missing).fill('');
-            let newRow = filtered.concat(zeros);
-            return newRow;
-        }
-
-        function moveLeft() {
-            let changeMade = false;
-            for (let i = 0; i < size; i++) {
-                let row = [];
-                for (let j = 0; j < size; j++) {
-                    row.push(squares[i * size + j].innerHTML);
-                }
-                
-                let processed = processRow(row);
-                for (let j = 0; j < size; j++) {
-                    if (squares[i * size + j].innerHTML !== processed[j]) changeMade = true;
-                    squares[i * size + j].innerHTML = processed[j];
-                    updateCellStyling(squares[i * size + j]);
-                }
-            }
-            if (changeMade) postMoveActions();
-        }
-
-        function moveRight() {
-            let changeMade = false;
-            for (let i = 0; i < size; i++) {
-                let row = [];
-                for (let j = 0; j < size; j++) {
-                    row.push(squares[i * size + j].innerHTML);
-                }
-                
-                let processed = processRow(row.reverse()).reverse();
-                for (let j = 0; j < size; j++) {
-                    if (squares[i * size + j].innerHTML !== processed[j]) changeMade = true;
-                    squares[i * size + j].innerHTML = processed[j];
-                    updateCellStyling(squares[i * size + j]);
-                }
-            }
-            if (changeMade) postMoveActions();
-        }
-
-        function moveUp() {
-            let changeMade = false;
-            for (let j = 0; j < size; j++) {
-                let col = [];
-                for (let i = 0; i < size; i++) {
-                    col.push(squares[i * size + j].innerHTML);
-                }
-                
-                let processed = processRow(col);
-                for (let i = 0; i < size; i++) {
-                    if (squares[i * size + j].innerHTML !== processed[i]) changeMade = true;
-                    squares[i * size + j].innerHTML = processed[i];
-                    updateCellStyling(squares[i * size + j]);
-                }
-            }
-            if (changeMade) postMoveActions();
-        }
-
-        function moveDown() {
-            let changeMade = false;
-            for (let j = 0; j < size; j++) {
-                let col = [];
-                for (let i = 0; i < size; i++) {
-                    col.push(squares[i * size + j].innerHTML);
-                }
-                
-                let processed = processRow(col.reverse()).reverse();
-                for (let i = 0; i < size; i++) {
-                    if (squares[i * size + j].innerHTML !== processed[i]) changeMade = true;
-                    squares[i * size + j].innerHTML = processed[i];
-                    updateCellStyling(squares[i * size + j]);
-                }
-            }
-            if (changeMade) postMoveActions();
-        }
-
-        function processRow(row) {
-            let filtered = row.filter(val => val !== '');
-            for (let i = 0; i < filtered.length - 1; i++) {
-                if (filtered[i] === filtered[i + 1]) {
-                    let mergedVal = parseInt(filtered[i]) * 2;
-                    filtered[i] = mergedVal;
-                    score += mergedVal;
-                    filtered.splice(i + 1, 1);
-                }
-            }
-            while (filtered.length < size) {
-                filtered.push('');
-            }
-            return filtered;
-        }
-
-        function updateCellStyling(cell) {
-            const val = cell.innerHTML;
-            cell.className = 'cell';
-            if (val !== '') {
-                cell.classList.add(`n${Math.min(parseInt(val), 16)}`);
-                if(parseInt(val) > 16) cell.classList.add('n-high');
+                element.className = 'cell n-high';
+                element.style.backgroundColor = 'hsl(' + (val % 360) + ', 70%, 50%)';
             }
         }
 
-        function postMoveActions() {
-            scoreDisplay.innerText = score;
-            checkLevelProgress();
-            generate();
-            
-            // Check if game is over (no empty spaces and no adjacent matches)
-            const emptySquares = squares.filter(sq => sq.innerHTML === '');
-            if (emptySquares.length === 0) {
-                let possible = false;
-                for (let i = 0; i < size; i++) {
-                    for (let j = 0; j < size; j++) {
-                        let currentVal = squares[i * size + j].innerHTML;
-                        if (j < size - 1 && currentVal === squares[i * size + (j + 1)].innerHTML) possible = true;
-                        if (i < size - 1 && currentVal === squares[(i + 1) * size + j].innerHTML) possible = true;
+        function getNewTileValue() {
+            let val; let attempts = 0;
+            while (attempts < 50) {
+                val = Math.floor(Math.random() * 5) + 1;
+                if (level >= 10 && val === 9) { attempts++; continue; }
+                if (level >= 9 && val === 8) { attempts++; continue; }
+                if (level >= 8 && val === 7) { attempts++; continue; }
+                if (level >= 7 && val === 6) { attempts++; continue; }
+                if (level >= 6 && val === 5) { attempts++; continue; }
+                if (level >= 5 && val === 4) { attempts++; continue; }
+                if (level >= 4 && val === 3) { attempts++; continue; }
+                if (level >= 3 && val === 2) { attempts++; continue; }
+                if (level >= 2 && val === 1) { attempts++; continue; }
+                return val;
+            }
+            return level + 1;
+        }
+
+        function refillGrid() {
+            let emptySpaces = false;
+            for (let i = 0; i < squares.length; i++) {
+                if (squares[i].innerHTML === '' || squares[i].innerHTML === '0') {
+                    let randomVal = getNewTileValue(); squares[i].innerHTML = randomVal; applyTileColor(squares[i], randomVal); emptySpaces = true;
+                }
+            }
+            updateStyles(); 
+            checkForPossibleMoves();
+            return emptySpaces;
+        }
+
+        function checkForPossibleMoves() {
+            for (let i = 0; i < squares.length; i++) {
+                let val = squares[i].innerHTML;
+                if (!val || val === '0') continue;
+
+                let row = Math.floor(i / size);
+                let col = i % size;
+
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        if (dr === 0 && dc === 0) continue;
+                        let nr = row + dr, nc = col + dc;
+                        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+                            let neighborIdx = nr * size + nc;
+                            if (squares[neighborIdx].innerHTML === val) return true;
+                        }
                     }
                 }
-                if (!possible) {
-                    triggerGameOver("nomoves");
-                }
             }
+            triggerGameOver("nomoves");
+            return false;
         }
 
-        function checkLevelProgress() {
+        function startTimerSystem() { clearInterval(timerId); if (gameMode === 'normal') return; timerId = setInterval(() => { if (!isGameOver) { timeLeft--; timerDisplay.innerHTML = timeLeft; if (timeLeft <= 0) triggerGameOver("timeout"); } }, 1000); }
+        function resetTimerForCurrentLevel() { if (gameMode === 'normal') return; if (level === 1) timeLeft = 60; else if (level === 2) timeLeft = 55; else if (level === 3) timeLeft = 50; else if (level === 4) timeLeft = 45; else if (level === 5) timeLeft = 40; else timeLeft = 30; timerDisplay.innerHTML = timeLeft; }
+
+        function removeBlockedTilesFromBoard() {
+            for (let i = 0; i < squares.length; i++) {
+                let currentVal = parseInt(squares[i].innerHTML); let isBlocked = false;
+                if (level >= 2 && currentVal === 1) isBlocked = true;
+                if (isBlocked) { 
+                    let newVal = getNewTileValue(); 
+                    squares[i].innerHTML = newVal; 
+                    applyTileColor(squares[i], newVal);
+                }
+            }
+            updateStyles();
+        }
+
+        function showLevelUpPopup() {
+            popupLevelVal.innerHTML = level; playLevelUpSound();
+            levelBox.classList.add('level-scroll-anim'); setTimeout(() => levelBox.classList.remove('level-scroll-anim'), 1000);
+            levelUpPopup.style.display = 'block'; setTimeout(() => levelUpPopup.classList.add('active'), 10);
+            setTimeout(() => { levelUpPopup.classList.remove('active'); setTimeout(() => levelUpPopup.style.display = 'none', 500); }, 1500);
+        }
+
+        function checkLevelUp() {
             if (score >= nextLevelScore) {
                 level++;
-                nextLevelScore += level * 100;
-                levelDisplay.innerText = level;
-                targetDisplay.innerText = nextLevelScore;
-                
-                // Trigger Level Up Popup Animation
-                popupLevelVal.innerText = level;
-                levelUpPopup.style.display = 'block';
-                levelUpPopup.classList.add('active');
-                levelBox.classList.add('level-scroll-anim');
+                let previousTarget = nextLevelScore;
+                nextLevelScore = Math.floor((previousTarget * 1.4) + (level * 10));
+                updateLevelUI();
+                resetTimerForCurrentLevel(); 
+                showLevelUpPopup(); 
+                removeBlockedTilesFromBoard(); 
+                checkLevelUp();
+            }
+        }
 
-                setTimeout(() => {
-                    levelUpPopup.classList.remove('active');
-                    levelUpPopup.style.display = 'none';
-                    levelBox.classList.remove('level-scroll-anim');
-                }, 1500);
+        function updateLevelUI() {
+            levelDisplay.innerHTML = level;
+            targetDisplay.innerHTML = nextLevelScore;
+            scoreDisplay.innerHTML = score;
+        }
 
-                if(gameMode === 'pro') {
-                    timeLeft += 30; // Bonus time on level up
+        function triggerGameOver(reason) { 
+            isGameOver = true; 
+            clearInterval(timerId); 
+            checkAndSaveHighScore(); 
+
+            if (reason === "timeout") {
+                gameOverMsg.innerHTML = "Aapka samay samapt ho gaya!";
+            } else if (reason === "nomoves") {
+                gameOverMsg.innerHTML = "Koi bhi box same nahi hai! Game Over.";
+            } else if (reason === "quit") {
+                gameOverMsg.innerHTML = "Aapne game Quit kiya. Score save ho gaya hai.";
+            }
+
+            if (gameMode === 'pro') {
+                document.getElementById('restart-btn').style.display = 'none';
+            } else {
+                document.getElementById('restart-btn').style.display = 'block';
+            }
+
+            gameOverOverlay.style.display = 'flex'; 
+        }
+
+        function updateStyles() { 
+            for (let i = 0; i < squares.length; i++) { 
+                let val = squares[i].innerHTML;
+                if (val !== '' && val !== '0') {
+                    applyTileColor(squares[i], parseInt(val));
+                }
+            } 
+        }
+
+        function triggerPopEffect(element) { const existing = document.querySelector('.pop-effect'); if (existing) existing.classList.remove('pop-effect'); element.classList.add('pop-effect'); }
+
+        let selectedPath = []; let isSwiping = false; let currentValue = null;
+        
+        function getCellIndexFromPoint(x, y) { 
+            const rect = gridDisplay.getBoundingClientRect(); 
+            const cellW = rect.width / size; const cellH = rect.height / size;
+            const col = Math.floor((x - rect.left) / cellW); const row = Math.floor((y - rect.top) / cellH); 
+            if (col >= 0 && col < size && row >= 0 && row < size) return row * size + col; 
+            return null; 
+        }
+        
+        function handleSwipeMove(clientX, clientY) {
+            if (!isSwiping || isGameOver) return;
+            const idx = getCellIndexFromPoint(clientX, clientY);
+            if (idx !== null) {
+                const val = squares[idx].innerHTML;
+                if (val !== '' && val !== '0') {
+                    if (selectedPath.length === 0) { currentValue = val; selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
+                    else if (selectedPath.length >= 2 && idx === selectedPath[selectedPath.length - 2]) { let rem = selectedPath.pop(); squares[rem].classList.remove('selected-cell'); }
+                    else if (val === currentValue && !selectedPath.includes(idx)) {
+                        const last = selectedPath[selectedPath.length - 1];
+                        const r1 = Math.floor(last/size), c1 = last%size, r2 = Math.floor(idx/size), c2 = idx%size;
+                        if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) { selectedPath.push(idx); squares[idx].classList.add('selected-cell'); playSwipeSoundLoud(); }
+                    }
+                    updateSwipeLine();
                 }
             }
         }
 
-        // Auto-login check on page load
-        window.onload = function() {
-            const savedMobile = localStorage.getItem('currentUserMobile');
-            if (savedMobile) {
-                database.ref('users/' + savedMobile).once('value').then(snap => {
-                    if (snap.exists()) {
-                        currentUserMobile = savedMobile;
-                        updateLastLogin(savedMobile);
-                        document.getElementById('auth-overlay').style.display = 'none';
-                        document.getElementById('mode-overlay').style.display = 'flex';
-                        fetchUserData();
-                        fetchGlobalScores();
-                    }
-                });
+        function updateSwipeLine() {
+            if (selectedPath.length < 1) { drawingLine.style.opacity = '0'; return; }
+            drawingLine.style.opacity = '1';
+            const rect = gridDisplay.getBoundingClientRect();
+            let d = '';
+            selectedPath.forEach((idx, i) => {
+                const cRect = squares[idx].getBoundingClientRect();
+                const cx = (cRect.left - rect.left) + (cRect.width / 2);
+                const cy = (cRect.top - rect.top) + (cRect.height / 2);
+                if (i === 0) d += `M ${cx} ${cy}`; else d += ` L ${cx} ${cy}`;
+            });
+            drawingLine.setAttribute('d', d);
+        }
+
+        function endSwipe() {
+            if (!isSwiping || isGameOver) return; 
+            isSwiping = false; 
+            drawingLine.style.opacity = '0';
+            selectedPath.forEach(idx => squares[idx].classList.remove('selected-cell'));
+            if (selectedPath.length >= 2) {
+                let total = 0; let lastIdx = selectedPath[selectedPath.length - 1];
+                selectedPath.forEach(idx => { total += parseInt(squares[idx].innerHTML); squares[idx].innerHTML = ''; });
+                squares[lastIdx].innerHTML = total; applyTileColor(squares[lastIdx], total); score += total; 
+                checkLevelUp(); updateLevelUI(); triggerPopEffect(squares[lastIdx]); playJoinSoundLoud(); resetTimerForCurrentLevel();
+                setTimeout(refillGrid, 100);
             }
-        };
+            selectedPath = []; currentValue = null; updateStyles();
+        }
+
+        gridDisplay.addEventListener('touchstart', (e) => { isSwiping = true; handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
+        gridDisplay.addEventListener('touchmove', (e) => { handleSwipeMove(e.touches[0].clientX, e.touches[0].clientY); e.preventDefault(); }, {passive: false});
+        gridDisplay.addEventListener('touchend', endSwipe);
+        gridDisplay.addEventListener('mousedown', (e) => { isSwiping = true; handleSwipeMove(e.clientX, e.clientY); });
+        window.addEventListener('mousemove', (e) => { if(isSwiping) handleSwipeMove(e.clientX, e.clientY); });
+        window.addEventListener('mouseup', endSwipe);
+
+        function resetGame() { 
+            score = 0; level = 1; nextLevelScore = 100;
+            timeLeft = 60; isGameOver = false; 
+            updateLevelUI(); timerDisplay.innerHTML = 60; 
+            gameOverOverlay.style.display = 'none'; 
+            levelUpPopup.style.display = 'none'; 
+            document.getElementById('restart-btn').style.display = 'block';
+            createBoard(); 
+            startTimerSystem(); 
+        }
+        
+        window.addEventListener('load', () => {
+            const saved = localStorage.getItem('currentUserMobile');
+            if (saved) { 
+                database.ref('users/' + saved).once('value').then((snap) => { 
+                    if (snap.exists()) { 
+                        currentUserMobile = saved; 
+                        updateLastLogin(saved);
+                        document.getElementById('auth-overlay').style.display = 'none'; 
+                        document.getElementById('mode-overlay').style.display = 'flex'; 
+                        fetchUserData();
+                        fetchGlobalScores(); 
+                    } 
+                }); 
+            }
+        });
+
+        createBoard();
     </script>
 </body>
 </html>
