@@ -746,8 +746,14 @@
             margin-bottom: 2px;
         }
 
-        /* ADD COINS TOP CENTER BUTTON & MODAL STYLES */
-        .add-coins-top-btn {
+        /* ADD COINS & WITHDRAW TOP CENTER BUTTONS & MODAL STYLES */
+        .action-buttons-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 10px auto;
+        }
+        .add-coins-top-btn, .withdraw-top-btn {
             background: linear-gradient(135deg, #f1c40f, #e67e22);
             color: #000;
             border: 2px solid #fff;
@@ -758,11 +764,14 @@
             cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             text-transform: uppercase;
-            margin: 10px auto;
-            display: block;
+            display: inline-block;
             transition: transform 0.2s;
         }
-        .add-coins-top-btn:active {
+        .withdraw-top-btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: #fff;
+        }
+        .add-coins-top-btn:active, .withdraw-top-btn:active {
             transform: scale(0.95);
         }
 
@@ -787,6 +796,15 @@
             background: #ffcc00;
             color: #000;
         }
+        .withdraw-history-item {
+            background: #080f14;
+            border-left: 4px solid #f1c40f;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            text-align: left;
+            border-radius: 4px;
+        }
     </style>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -803,13 +821,13 @@
         <button class="sidebar-btn" onclick="openTermConditions()">📋 Terms & Conditions</button>
         <button class="sidebar-btn" onclick="openWhatsAppHelp()">📞 Help</button>
         <button class="sidebar-btn" onclick="handleLogout()">🚪 Logout</button>
-        <button class="sidebar-close-btn" onclick="toggleLeftSidebar(false)">Close Menu</button>
+        <button class="sidebar-close-btn" onclick="closeSidebarWithHistory()">Close Menu</button>
     </div>
 
     <!-- ADD COINS MODAL -->
     <div class="modal-overlay" id="add-coins-modal">
         <div class="modal-card" style="max-width: 350px;">
-            <span class="modal-close-btn" onclick="closeModal('add-coins-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('add-coins-modal')">&times;</span>
             <h2 style="color: #ffcc00; margin-top:0;">Add Coins</h2>
             
             <div id="coin-selection-step">
@@ -847,9 +865,51 @@
         </div>
     </div>
 
+    <!-- NAYA WITHDRAWAL MODAL -->
+    <div class="modal-overlay" id="withdraw-modal">
+        <div class="modal-card" style="max-width: 350px;">
+            <span class="modal-close-btn" onclick="closeModalWithHistory('withdraw-modal')">&times;</span>
+            <h2 style="color: #ffcc00; margin-top:0;">Withdraw Coins</h2>
+            <div style="background: #080f14; padding: 8px; border-radius: 5px; margin-bottom: 12px; border: 1px solid #1a3344;">
+                <span style="font-size: 13px; color: #ccc;">Wallet Balance:</span> <b style="color: #2ecc71;" id="withdraw-wallet-balance">0 Coins</b>
+            </div>
+
+            <div class="input-group">
+                <label style="color: #ffcc00; font-size:12px;">Withdraw Coins (Min: 200)</label>
+                <input type="number" id="withdraw-amount" placeholder="Enter coins to withdraw" min="200">
+            </div>
+
+            <div class="input-group">
+                <label style="color: #ffcc00; font-size:12px;">Payment Method</label>
+                <select id="withdraw-method">
+                    <option value="Google Pay">Google Pay</option>
+                    <option value="PhonePe">PhonePe</option>
+                    <option value="Paytm">Paytm</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label style="color: #ffcc00; font-size:12px;">UPI ID / Mobile Number</label>
+                <input type="text" id="withdraw-destination" placeholder="Enter UPI ID or Mobile Number">
+            </div>
+
+            <button class="auth-btn" id="submit-withdraw-btn" onclick="submitWithdrawRequest()" style="font-size: 14px; margin-top:5px;">Withdraw Request</button>
+            <button onclick="openWithdrawHistory()" style="background: #3498db; color: white; border: none; padding: 6px; border-radius: 4px; font-size: 12px; width: 100%; margin-top: 10px; cursor: pointer;">Withdrawal History</button>
+        </div>
+    </div>
+
+    <!-- WITHDRAWAL HISTORY MODAL -->
+    <div class="modal-overlay" id="withdraw-history-modal">
+        <div class="modal-card">
+            <span class="modal-close-btn" onclick="closeModalWithHistory('withdraw-history-modal')">&times;</span>
+            <h2 style="color: #ffcc00;">Withdrawal History</h2>
+            <div id="withdraw-history-list" class="text-modal-content"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="history-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('history-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('history-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Win History</h2>
             <div id="win-history-list" class="text-modal-content"></div>
         </div>
@@ -857,7 +917,7 @@
 
     <div class="modal-overlay" id="rank-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('rank-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('rank-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Room Ranking</h2>
             <div id="rank-list" class="text-modal-content">
                 <div class="rank-entry rank-header">
@@ -871,7 +931,7 @@
 
     <div class="modal-overlay" id="room-history-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('room-history-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('room-history-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Room History</h2>
             <div id="room-history-list" class="text-modal-content"></div>
         </div>
@@ -879,7 +939,7 @@
 
     <div class="modal-overlay" id="dashboard-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('dashboard-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('dashboard-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Math Merge Data</h2>
             <div style="text-align: left;">
                 <div class="dashboard-row">
@@ -916,7 +976,7 @@
 
     <div class="modal-overlay" id="rules-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('rules-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('rules-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Game Rules</h2>
             <div class="text-modal-content">
                 <h4>In English:</h4>
@@ -940,7 +1000,7 @@
 
     <div class="modal-overlay" id="terms-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeModal('terms-modal')">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('terms-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Terms & Conditions</h2>
             <div class="text-modal-content">
                 <h4>Game Integrity:</h4>
@@ -959,12 +1019,12 @@
         <button class="side-menu-btn" onclick="openGameRules()">📜 Game Rules</button>
         <button class="side-menu-btn" onclick="openWhatsAppHelp()">📞 Help and Support</button>
         <button class="side-menu-btn" onclick="openTermConditions()">📋 Term and Conditions</button>
-        <button class="close-menu-btn" onclick="toggleSidebar(false)">Close Menu</button>
+        <button class="close-menu-btn" onclick="closeSidebarWithHistory()">Close Menu</button>
     </div>
 
     <div class="modal-overlay" id="profile-modal">
         <div class="modal-card">
-            <span class="modal-close-btn" onclick="closeProfileModal()">&times;</span>
+            <span class="modal-close-btn" onclick="closeModalWithHistory('profile-modal')">&times;</span>
             <h2 style="color: #ffcc00;">Update Profile</h2>
             
             <div class="profile-pic-container">
@@ -1052,8 +1112,11 @@
             <button class="mode-btn normal-btn" style="background: #2ecc71;" onclick="startGameMode('normal')">Normal Play</button>
             <button class="mode-btn pro-btn" style="background: #e67e22;" onclick="openRoomDashboard()">Pro Play (Coins)</button>
 
-            <!-- TOP CENTER ADD COINS BUTTON -->
-            <button class="add-coins-top-btn" onclick="openAddCoinsModal()">➕ Add Coins</button>
+            <!-- TOP CENTER ADD COINS & WITHDRAW BUTTONS -->
+            <div class="action-buttons-row">
+                <button class="add-coins-top-btn" onclick="openAddCoinsModal()">➕ Add Coins</button>
+                <button class="withdraw-top-btn" onclick="openWithdrawModal()">📥 Withdraw</button>
+            </div>
 
             <div class="highscore-title">🏆 Normal Mode Top Scores 🏆</div>
             <div class="highscore-row">
@@ -1110,7 +1173,7 @@
         
         <div id="active-rooms-list" style="margin-top: 10px;"></div>
 
-        <button onclick="document.getElementById('room-overlay').style.display='none'" style="margin-top: 20px; padding: 10px; background: #555; color: white; border: none; border-radius: 5px; width: 100%;">Close Dashboard</button>
+        <button onclick="closeRoomDashboardWithHistory()" style="margin-top: 20px; padding: 10px; background: #555; color: white; border: none; border-radius: 5px; width: 100%;">Close Dashboard</button>
     </div>
 
     <div id="game-over-overlay">
@@ -1207,10 +1270,162 @@
 
         let selectedCoinPackage = 0;
 
+        /* --- MOBILE BACK BUTTON & HISTORY MANAGEMENT SYSTEM --- */
+        let activeModalOrViewId = null;
+
+        function pushHistoryState(viewId) {
+            activeModalOrViewId = viewId;
+            history.pushState({ view: viewId }, "");
+        }
+
+        window.onpopstate = function(event) {
+            const modeOverlayDisplay = document.getElementById('mode-overlay').style.display;
+            const authOverlayDisplay = document.getElementById('auth-overlay').style.display;
+            const gameOverDisplay = gameOverOverlay.style.display;
+
+            if (authOverlayDisplay === 'flex') {
+                return;
+            }
+
+            if (modeOverlayDisplay === 'flex') {
+                if (document.getElementById('left-sidebar-menu').classList.contains('active')) {
+                    toggleLeftSidebar(false);
+                    return;
+                }
+                if (document.getElementById('room-overlay').style.display === 'flex') {
+                    document.getElementById('room-overlay').style.display = 'none';
+                    return;
+                }
+                const modals = ['add-coins-modal', 'withdraw-modal', 'withdraw-history-modal', 'history-modal', 'rank-modal', 'room-history-modal', 'dashboard-modal', 'rules-modal', 'terms-modal', 'profile-modal'];
+                let modalClosed = false;
+                modals.forEach(mId => {
+                    if (document.getElementById(mId).style.display === 'flex') {
+                        document.getElementById(mId).style.display = 'none';
+                        modalClosed = true;
+                    }
+                });
+                if (modalClosed) return;
+                return;
+            }
+
+            if (gameOverDisplay !== 'flex') {
+                confirmBackToMenu();
+                history.pushState({ view: 'gameplay' }, "");
+            } else {
+                backToMenuFromGameOver();
+            }
+        };
+
         function openAddCoinsModal() {
             if(!currentUserMobile) { alert("Please login first!"); return; }
             document.getElementById('add-coins-modal').style.display = 'flex';
+            pushHistoryState('add-coins-modal');
             resetCoinSelection();
+        }
+
+        /* --- NAYA WITHDRAWAL FUNCTIONS --- */
+        function openWithdrawModal() {
+            if(!currentUserMobile) { alert("Please login first!"); return; }
+            document.getElementById('withdraw-wallet-balance').innerText = userCoins + " Coins";
+            document.getElementById('withdraw-amount').value = '';
+            document.getElementById('withdraw-destination').value = '';
+            document.getElementById('withdraw-modal').style.display = 'flex';
+            pushHistoryState('withdraw-modal');
+        }
+
+        function submitWithdrawRequest() {
+            const amountInput = document.getElementById('withdraw-amount').value.trim();
+            const amount = parseInt(amountInput);
+            const method = document.getElementById('withdraw-method').value;
+            const destination = document.getElementById('withdraw-destination').value.trim();
+            const submitBtn = document.getElementById('submit-withdraw-btn');
+
+            if(!amount || isNaN(amount)) { alert("Kripya valid coin amount dalein!"); return; }
+            
+            // Minimum Withdrawal Limit 200 Coins check
+            if(amount < 200) {
+                alert("Minimum withdrawal is 200 coins.");
+                return;
+            }
+
+            // Insufficient Balance Check
+            if(amount > userCoins) {
+                alert("Insufficient Balance! Aapke wallet mein utne coins nahi hain.");
+                return;
+            }
+
+            if(!destination) { alert("Kripya apna UPI ID ya Mobile Number enter karein!"); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Submitting Please Wait...";
+
+            database.ref('users/' + currentUserMobile).once('value').then(snap => {
+                const userData = snap.val() || {};
+                
+                // Deduct coins from user wallet immediately upon request submission
+                const newBalance = userCoins - amount;
+
+                database.ref('users/' + currentUserMobile + '/coins').set(newBalance).then(() => {
+                    const withdrawData = {
+                        mobile: currentUserMobile,
+                        name: userData.name || "Unknown",
+                        coins: amount,
+                        method: method,
+                        destination: destination,
+                        status: "Pending",
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
+
+                    database.ref('withdrawals').push(withdrawData).then(() => {
+                        alert("Withdrawal request successfully submit ho gayi hai! Status: Pending.");
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Withdraw Request";
+                        closeModalWithHistory('withdraw-modal');
+                    }).catch(err => {
+                        // Revert balance if failed
+                        database.ref('users/' + currentUserMobile + '/coins').set(userCoins);
+                        alert("Error: " + err.message);
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Withdraw Request";
+                    });
+                });
+            });
+        }
+
+        function openWithdrawHistory() {
+            const listDiv = document.getElementById('withdraw-history-list');
+            listDiv.innerHTML = 'Loading...';
+            document.getElementById('withdraw-history-modal').style.display = 'flex';
+            pushHistoryState('withdraw-history-modal');
+
+            database.ref('withdrawals').orderByChild('mobile').equalTo(currentUserMobile).once('value').then(snap => {
+                listDiv.innerHTML = '';
+                const data = snap.val();
+                if(!data) { listDiv.innerHTML = '<p>Koi withdrawal history nahi mili.</p>'; return; }
+
+                Object.values(data).reverse().forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'withdraw-history-item';
+                    let statusColor = item.status === 'Successfully Approved' ? '#2ecc71' : '#f1c40f';
+                    div.innerHTML = `
+                        <div><b>Coins:</b> ${item.coins} | <b>Method:</b> ${item.method}</div>
+                        <div><b>Destination:</b> ${item.destination}</div>
+                        <div><b>Status:</b> <span style="color: ${statusColor}; font-weight: bold;">${item.status}</span></div>
+                    `;
+                    listDiv.appendChild(div);
+                });
+            });
+        }
+
+        function closeModalWithHistory(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (window.history.state && window.history.state.view === modalId) {
+                history.back();
+            }
+        }
+
+        function closeModal(modalId) {
+            closeModalWithHistory(modalId);
         }
 
         function selectCoinPackage(amount) {
@@ -1272,7 +1487,7 @@
                     database.ref('deposits').push(depositData).then(() => {
                         alert("Deposit request successfully submit ho gayi hai! Admin verify karke coins add kar dega.");
                         resetCoinSelection();
-                        closeModal('add-coins-modal');
+                        closeModalWithHistory('add-coins-modal');
                     }).catch(err => {
                         alert("Error: " + err.message);
                         submitBtn.disabled = false;
@@ -1296,8 +1511,16 @@
 
         function openRoomDashboard() {
             document.getElementById('room-overlay').style.display = 'flex';
+            pushHistoryState('room-overlay');
             fetchUserData();
             fetchActiveRooms();
+        }
+
+        function closeRoomDashboardWithHistory() {
+            document.getElementById('room-overlay').style.display = 'none';
+            if (window.history.state && window.history.state.view === 'room-overlay') {
+                history.back();
+            }
         }
 
         function fetchUserData() {
@@ -1359,6 +1582,7 @@
             const listDiv = document.getElementById('room-history-list');
             listDiv.innerHTML = 'History load ho rahi hai...';
             document.getElementById('room-history-modal').style.display = 'flex';
+            pushHistoryState('room-history-modal');
 
             database.ref('rooms').orderByChild('status').equalTo('completed').limitToLast(15).once('value').then(snap => {
                 const rooms = snap.val();
@@ -1415,6 +1639,7 @@
                     });
                 }
                 document.getElementById('rank-modal').style.display = 'flex';
+                pushHistoryState('rank-modal');
             });
         }
 
@@ -1541,6 +1766,7 @@
                     historyList.appendChild(div);
                 });
                 document.getElementById('history-modal').style.display = 'flex';
+                pushHistoryState('history-modal');
             });
         }
 
@@ -1616,6 +1842,7 @@
                         updateLastLogin(mobile);
                         document.getElementById('auth-overlay').style.display = 'none';
                         document.getElementById('mode-overlay').style.display = 'flex';
+                        pushHistoryState('mode-overlay');
                         fetchUserData();
                         fetchGlobalScores(); 
                     } else alert("Galat Password!");
@@ -1674,6 +1901,7 @@
             gameMode = mode;
             document.getElementById('mode-overlay').style.display = 'none';
             document.getElementById('timer-box').style.display = (mode === 'normal') ? 'none' : 'block';
+            pushHistoryState('gameplay');
             resetGame();
         }
 
@@ -1688,15 +1916,32 @@
             checkAndSaveHighScore(); 
             activeRoomId = null; 
             document.getElementById('mode-overlay').style.display = 'flex'; 
+            pushHistoryState('mode-overlay');
         }
 
         function backToMenuFromGameOver() { 
             gameOverOverlay.style.display = 'none'; 
             activeRoomId = null;
             document.getElementById('mode-overlay').style.display = 'flex'; 
+            pushHistoryState('mode-overlay');
         }
 
-        function toggleSidebar(show) { const sidebar = document.getElementById('sidebar-menu'); if (show) sidebar.classList.add('active'); else sidebar.classList.remove('active'); }
+        function toggleSidebar(show) { 
+            const sidebar = document.getElementById('sidebar-menu'); 
+            if (show) {
+                sidebar.classList.add('active');
+                pushHistoryState('sidebar-menu');
+            } else {
+                sidebar.classList.remove('active');
+            }
+        }
+
+        function closeSidebarWithHistory() {
+            toggleSidebar(false);
+            if (window.history.state && window.history.state.view === 'sidebar-menu') {
+                history.back();
+            }
+        }
         
         function openProfileModal() {
             toggleSidebar(false);
@@ -1710,11 +1955,11 @@
                     document.getElementById('prof-refer').value = user.mobile;
                     document.getElementById('profile-img').src = user.profilePic || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
                     document.getElementById('profile-modal').style.display = 'flex';
+                    pushHistoryState('profile-modal');
                 }
             });
         }
 
-        function closeProfileModal() { document.getElementById('profile-modal').style.display = 'none'; }
         function handleProfilePic(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = (e) => document.getElementById('profile-img').src = e.target.result; reader.readAsDataURL(input.files[0]); } }
         
         function saveProfileChanges() {
@@ -1722,10 +1967,19 @@
             const newPass = document.getElementById('prof-pass').value.trim();
             const profilePicData = document.getElementById('profile-img').src;
             if (!newName || !newPass) { alert("Details khali nahi ho sakte!"); return; }
-            database.ref('users/' + currentUserMobile).update({ name: newName, pass: newPass, profilePic: profilePicData }).then(() => { alert("Profile update ho gayi!"); closeProfileModal(); });
+            database.ref('users/' + currentUserMobile).update({ name: newName, pass: newPass, profilePic: profilePicData }).then(() => { alert("Profile update ho gayi!"); closeModalWithHistory('profile-modal'); });
         }
 
-        function toggleLeftSidebar(show) { const sidebar = document.getElementById('left-sidebar-menu'); if (show) sidebar.classList.add('active'); else sidebar.classList.remove('active'); }
+        function toggleLeftSidebar(show) { 
+            const sidebar = document.getElementById('left-sidebar-menu'); 
+            if (show) {
+                sidebar.classList.add('active');
+                pushHistoryState('left-sidebar-menu');
+            } else {
+                sidebar.classList.remove('active');
+            }
+        }
+
         function openProfileModalFromSidebar() { toggleLeftSidebar(false); openProfileModal(); }
         
         function handleShareLink() { 
@@ -1745,9 +1999,16 @@
             }
         }
 
-        function openGameRules() { document.getElementById('rules-modal').style.display = 'flex'; }
-        function openTermConditions() { document.getElementById('terms-modal').style.display = 'flex'; }
-        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function openGameRules() { 
+            document.getElementById('rules-modal').style.display = 'flex'; 
+            pushHistoryState('rules-modal');
+        }
+
+        function openTermConditions() { 
+            document.getElementById('terms-modal').style.display = 'flex'; 
+            pushHistoryState('terms-modal');
+        }
+
         function openWhatsAppHelp() { window.open("https://wa.me/+966578913144", '_blank'); }
         
         function handleLogout() {
@@ -1768,6 +2029,7 @@
                     document.getElementById('dash-coins').innerHTML = user.coins || 0;
                 }
                 document.getElementById('dashboard-modal').style.display = 'flex';
+                pushHistoryState('dashboard-modal');
             });
         }
 
@@ -2036,6 +2298,7 @@
                         updateLastLogin(saved);
                         document.getElementById('auth-overlay').style.display = 'none'; 
                         document.getElementById('mode-overlay').style.display = 'flex'; 
+                        pushHistoryState('mode-overlay');
                         fetchUserData();
                         fetchGlobalScores(); 
                     } 
