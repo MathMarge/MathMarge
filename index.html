@@ -1815,14 +1815,18 @@
             });
         }
 
+        /* --- UPDATED FINALIZE SIGNUP WITH CREATEDAT TIMESTAMP --- */
         function finalizeSignup(name, mobile, pass, coins, msg) {
             database.ref('users/' + mobile).set({
-                name: name, mobile: mobile, pass: pass,
+                name: name, 
+                mobile: mobile, 
+                pass: pass,
                 profilePic: "https://cdn-icons-png.flaticon.com/512/149/149071.png",
                 coins: coins,
                 lastLevel: 1,
                 lastScore: 0,
-                lastLogin: firebase.database.ServerValue.TIMESTAMP
+                lastLogin: firebase.database.ServerValue.TIMESTAMP,
+                createdAt: firebase.database.ServerValue.TIMESTAMP // <--- Yahan add kiya gaya hai taaki exact date & time save ho
             }).then(() => { 
                 alert(msg); 
                 switchAuth('login'); 
