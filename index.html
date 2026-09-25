@@ -1270,7 +1270,7 @@
 
         let selectedCoinPackage = 0;
 
-        /* --- MOBILE BACK BUTTON & HISTORY MANAGEMENT SYSTEM --- */
+        /* --- FIXED NAVIGATION & HISTORY MANAGEMENT SYSTEM --- */
         let activeModalOrViewId = null;
 
         function pushHistoryState(viewId) {
@@ -1278,42 +1278,84 @@
             history.pushState({ view: viewId }, "");
         }
 
+        // Modal Close karne ke liye clean function
+        function closeModalWithHistory(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            if (window.history.state && window.history.state.view === modalId) {
+                history.back();
+            }
+        }
+
+        function closeModal(modalId) {
+            closeModalWithHistory(modalId);
+        }
+
+        // Window Popstate Listener Fix
         window.onpopstate = function(event) {
+            const currentState = event.state ? event.state.view : null;
+
+            // List of all popup modals
+            const modals = [
+                'add-coins-modal', 'withdraw-modal', 'withdraw-history-modal', 
+                'history-modal', 'rank-modal', 'room-history-modal', 
+                'dashboard-modal', 'rules-modal', 'terms-modal', 'profile-modal'
+            ];
+
+            // Check if any sub-modal is open and close it first
+            let modalClosed = false;
+            modals.forEach(mId => {
+                const el = document.getElementById(mId);
+                if (el && el.style.display === 'flex') {
+                    el.style.display = 'none';
+                    modalClosed = true;
+                }
+            });
+
+            if (modalClosed) {
+                return; // Tab tak Room Overlay ko hide mat karo
+            }
+
+            // Check Left Sidebar
+            const leftSidebar = document.getElementById('left-sidebar-menu');
+            if (leftSidebar && leftSidebar.classList.contains('active')) {
+                toggleLeftSidebar(false);
+                return;
+            }
+
+            // Check Right Sidebar
+            const sideMenu = document.getElementById('sidebar-menu');
+            if (sideMenu && sideMenu.classList.contains('active')) {
+                toggleSidebar(false);
+                return;
+            }
+
+            // Room Overlay (Page 2) Handling
+            const roomOverlay = document.getElementById('room-overlay');
+            if (roomOverlay && roomOverlay.style.display === 'flex') {
+                if (currentState !== 'room-overlay') {
+                    roomOverlay.style.display = 'none';
+                }
+                return;
+            }
+
+            // Game Over Overlay
+            if (gameOverOverlay && gameOverOverlay.style.display === 'flex') {
+                backToMenuFromGameOver();
+                return;
+            }
+
             const modeOverlayDisplay = document.getElementById('mode-overlay').style.display;
             const authOverlayDisplay = document.getElementById('auth-overlay').style.display;
-            const gameOverDisplay = gameOverOverlay.style.display;
 
-            if (authOverlayDisplay === 'flex') {
+            if (authOverlayDisplay === 'flex' || modeOverlayDisplay === 'flex') {
                 return;
             }
 
-            if (modeOverlayDisplay === 'flex') {
-                if (document.getElementById('left-sidebar-menu').classList.contains('active')) {
-                    toggleLeftSidebar(false);
-                    return;
-                }
-                if (document.getElementById('room-overlay').style.display === 'flex') {
-                    document.getElementById('room-overlay').style.display = 'none';
-                    return;
-                }
-                const modals = ['add-coins-modal', 'withdraw-modal', 'withdraw-history-modal', 'history-modal', 'rank-modal', 'room-history-modal', 'dashboard-modal', 'rules-modal', 'terms-modal', 'profile-modal'];
-                let modalClosed = false;
-                modals.forEach(mId => {
-                    if (document.getElementById(mId).style.display === 'flex') {
-                        document.getElementById(mId).style.display = 'none';
-                        modalClosed = true;
-                    }
-                });
-                if (modalClosed) return;
-                return;
-            }
-
-            if (gameOverDisplay !== 'flex') {
-                confirmBackToMenu();
-                history.pushState({ view: 'gameplay' }, "");
-            } else {
-                backToMenuFromGameOver();
-            }
+            confirmBackToMenu();
+            history.pushState({ view: 'gameplay' }, "");
         };
 
         function openAddCoinsModal() {
@@ -1415,17 +1457,6 @@
                     listDiv.appendChild(div);
                 });
             });
-        }
-
-        function closeModalWithHistory(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            if (window.history.state && window.history.state.view === modalId) {
-                history.back();
-            }
-        }
-
-        function closeModal(modalId) {
-            closeModalWithHistory(modalId);
         }
 
         function selectCoinPackage(amount) {
@@ -1578,6 +1609,7 @@
             });
         }
 
+        // Fixed openRoomHistoryModal Function
         function openRoomHistoryModal() {
             const listDiv = document.getElementById('room-history-list');
             listDiv.innerHTML = 'History load ho rahi hai...';
@@ -1621,6 +1653,7 @@
             });
         }
 
+        // Fixed showRoomRankings Function
         function showRoomRankings(roomId) {
             database.ref('rooms/' + roomId + '/scores').once('value').then(snap => {
                 const scores = snap.val();
@@ -1628,7 +1661,7 @@
                 container.innerHTML = '';
                 
                 if(!scores) {
-                    container.innerHTML = '<p style="padding:10px;">Abhi kisi ne nahi khela.</p>';
+                    container.innerHTML = '<p style="padding:10px; color:#fff;">Abhi kisi ne nahi khela.</p>';
                 } else {
                     const sortedScores = Object.values(scores).sort((a, b) => b.score - a.score);
                     sortedScores.forEach(entry => {
@@ -1803,7 +1836,7 @@
                             if(refSnap.exists()) {
                                 initialCoins = 20;
                                 database.ref('users/' + refer + '/coins').transaction(c => (c || 0) + 10);
-                                finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! Valid refer code ki wajah se 20 Coins mile hain.");
+                                finalizeSignup(name, mobile, pass, initialCoins, "Signup safal! Valid refer code ki वजह se 20 Coins mile hain.");
                             } else {
                                 finalizeSignup(name, mobile, pass, 10, "Refer code galat hai, par signup ho gaya! 10 Coins mile hain.");
                             }
@@ -1815,7 +1848,6 @@
             });
         }
 
-        /* --- UPDATED FINALIZE SIGNUP WITH CREATEDAT TIMESTAMP --- */
         function finalizeSignup(name, mobile, pass, coins, msg) {
             database.ref('users/' + mobile).set({
                 name: name, 
@@ -1826,7 +1858,7 @@
                 lastLevel: 1,
                 lastScore: 0,
                 lastLogin: firebase.database.ServerValue.TIMESTAMP,
-                createdAt: firebase.database.ServerValue.TIMESTAMP // <--- Yahan add kiya gaya hai taaki exact date & time save ho
+                createdAt: firebase.database.ServerValue.TIMESTAMP
             }).then(() => { 
                 alert(msg); 
                 switchAuth('login'); 
